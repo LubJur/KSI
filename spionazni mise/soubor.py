@@ -4,7 +4,7 @@ from tkinter import Tk, Canvas, PhotoImage, ttk, StringVar
 
 window = Tk()
 canvas = Canvas(window, width=800, height=800)
-canvas.grid(row=0, column=0, columnspan=2)
+canvas.grid(row=0, column=0, columnspan=3)
 bg = PhotoImage(file="map.gif")
 canvas.create_image(0, 0, image=bg, anchor="nw")
 
@@ -19,13 +19,23 @@ SIZE_Y = TOP - BOTTOM
 
 def nmea_to_decimal(nmea) -> float:
     nmea = str(nmea)
-    if nmea[0] == 0:  # tiez by mohlo byt nmea.startswith("0")
+    if nmea[0] == 0:
         degrees = float(nmea[0:3])
         minutes = float(nmea[3:])
     else:
         degrees = float(nmea[0:2])
         minutes = float(nmea[2:])
-    return degrees + minutes / 60
+    decimal = degrees + minutes / 60
+    print(TOP > decimal > BOTTOM)
+    print(RIGHT > decimal > LEFT)
+    # TODO: dokonci overovanie nmea ci moze byt
+    if (BOTTOM <= decimal or decimal >= TOP) or (LEFT <= decimal or decimal >= RIGHT):
+        print("aset pass")
+    else:
+        print("aset fail")
+    assert (BOTTOM < degrees + minutes / 60 < TOP or LEFT < degrees + minutes / 60 < RIGHT), "NMEA data is larger than " \
+                                                                                             "map size "
+    return decimal
 
 
 def coordinates_to_xy(coordinate):
@@ -77,7 +87,10 @@ with open("log.txt", "r") as file:
             x = coordinates_to_xy(nmea_to_decimal(x))
             y = coordinates_to_xy(nmea_to_decimal(y))
             list_of_xy.append([x, y])
+    assert list_of_xy != [], "Data file is invalid"
 
+# TODO: pridat do list_of_xy aj cas
+# TODO: ukazovat stupne a cas v okne
 now_point = StringVar(value="0")
 
 
@@ -101,28 +114,30 @@ def slider_change(event):
     canvas.create_oval(x, y, x + 10, y + 10, fill="red")
     canvas.update_idletasks()
 
+
 points = []
+
 for i in range(int(now_point.get())):
     points.append(Point(canvas, list_of_xy[i][0], list_of_xy[i][1]))
     print(points)
 
 """
-
 print(x, y)
 canvas.create_oval(x, y, x + 10, y + 10, fill="red")
 point1 = Point(canvas, x, y)
 point1.draw_point()
 """
+
 next_button = ttk.Button(window, text="+1", command=next_point)
-next_button.grid(row=1, column=1)
+next_button.grid(row=1, column=2, sticky="w")
 
 back_button = ttk.Button(window, text="-1", command=back_point)
-back_button.grid(row=1, column=0)
+back_button.grid(row=1, column=0, sticky="e")
 
-value_slider = ttk.Scale(window, from_=0, to=len(list_of_xy)-1, command=slider_change)
-value_slider.grid(row=2, column=1)
+value_slider = ttk.Scale(window, from_=0, to=len(list_of_xy) - 1, command=slider_change)
+value_slider.grid(row=2, column=0, columnspan=3, sticky="nsew")
 
 label = ttk.Label(window, textvariable=now_point)
-label.grid(row=2, column=0)
+label.grid(row=1, column=1)
 
 window.mainloop()
