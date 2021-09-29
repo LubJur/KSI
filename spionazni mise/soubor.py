@@ -81,7 +81,6 @@ class Point:
         self.point = canvas.create_oval(0, 0, 0, 0, width=0)
 
     def delete_point(self):
-        print("vymazavam objekt:", self)
         canvas.delete(self.point)
         if self in drawn_points:
             drawn_points.remove(self)
@@ -131,9 +130,7 @@ def next_point():
 
 def back_point():
     if int(now_point.get()) > 0:
-        popped_exists = drawn_points.pop()
-        popped_exists.delete_point()
-        #points[int(now_point.get())].delete_point()
+        drawn_points.pop().delete_point()
         now_point.set(int(now_point.get()) - 1)
         canvas.update_idletasks()
         time.set(points[int(now_point.get())].time)
@@ -163,26 +160,35 @@ def delete_all():
 
 
 def slider_change(event):
-    #print(int(now_point.get()))
-    #print(int(value_slider.get()))
     time.set(points[int(now_point.get())].time)
     latitude.set(points[int(now_point.get())].lat)
     longitude.set(points[int(now_point.get())].long)
     if int(now_point.get()) < int(value_slider.get()):
+        for i in points[int(now_point.get()) : int(value_slider.get())]:
+            i.draw_point()
         now_point.set(int(value_slider.get()))
+        """
+        ind_last_point = drawn_points.index(last_point)
+        print(last_point, ind_last_point)
+        #for i in points[points.index(drawn_points.pop()) : int(now_point.get())]
+            #i.draw_point()
         points[int(now_point.get())].draw_point()
-        #next_point()
+        """
     else:
+        for i in points[int(value_slider.get()) : int(now_point.get())]:
+            i.delete_point()
+        now_point.set(int(value_slider.get()))
         """
         I haven't found a better way to go backwards without leaving artefacts than
         deleting everything and redrawing until new point number
-        """
+        
         now_point.set(int(value_slider.get()))
         points[int(now_point.get())].delete_point()
         canvas.delete("all")
         canvas.create_image(0, 0, image=bg, anchor="nw")
         for i in points[:int(now_point.get())]:
             i.draw_point()
+        """
     #canvas.update_idletasks()
         #back_point()
     """
