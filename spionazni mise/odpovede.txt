@@ -1,0 +1,9 @@
+1. Na MUNI FI pretože tam začína aj končí trasu
+2. V blízkosti Bayerova 36 kde sa zastaví cestou zo školy
+3. Chorý, pretože se zastavil v lekárni Nova na Botanická 61
+4. Niečo zdravé v reštaurácií Buchta B na Štefánikova 85/16
+
+BONUS: - Program dokáže vykresľovať mapu aj postupne po bodoch
+         cez tkinter scale alebo tlačidlami +1/-1
+       - O poslednom vykreslenom bode sú napísané aj ďalšie
+         informácie, ako čas, geografická šírka a dĺžka
