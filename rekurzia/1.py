@@ -1,6 +1,14 @@
 # Tuto funkci implementuj.
 
 def penguins_in_group(total: int, group_size: int) -> int:
+    if group_size <= 0:
+        return 0
+    else:
+        return total - penguins_in_group(total-group_size, group_size - 1)
+
+
+"""
+def penguins_in_group(total: int, group_size: int) -> int:
     groups = 0
     if group_size == 0:
         return 0
@@ -8,7 +16,7 @@ def penguins_in_group(total: int, group_size: int) -> int:
         total = total - group_size
         groups += 1
     return groups
-
+"""
 
 """
 1. whats the simplest possible input?
@@ -19,10 +27,10 @@ def penguins_in_group(total: int, group_size: int) -> int:
 """
 
 # def penguins_in_group(total: int, group_size: int) -> int:
-#     if total <= group_size or group_size == 0:
-#         return total
+#     if total <= 0:
+#         return 0
 #     else:
-#         return = total - penguins_in_group(total-group_size, group_size)
+#         return 1 + penguins_in_group(total-group_size, group_size)
 
 
 # Testy:
