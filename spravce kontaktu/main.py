@@ -2,6 +2,7 @@
 # https://tkdocs.com/shipman/ttk-Treeview.html
 # https://docs.python.org/3/library/tkinter.ttk.html#treeview
 import json
+from json import JSONEncoder
 import re
 from tkinter import Tk, ttk, Toplevel, StringVar
 from typing import List
@@ -30,6 +31,13 @@ class Contact:
         else:
             print("E-mail is invalid")
 
+    def set_phone(self, phone):
+        # https://regex101.com/
+        if re.fullmatch(r"\+[0-9, ]+|[0-9, ]+", phone):
+            print("telefon plati")
+            self.phone = phone
+        else:
+            print("telefon neplati")
 
 contacts: List[Contact] = []
 
@@ -38,31 +46,22 @@ tree = ttk.Treeview(window, columns=(0, 1))
 tree.heading(0, text="Name")
 tree.heading(1, text="Phone")
 
+
 def contact_window(contact_index):
-    """
-    I store the index of object Contact in list contacts
-    inside of the tree because tree stores it as a str
-    """
-    new_window = Toplevel(window)
-    contact = contacts[contact_index]
 
-    name = ttk.Label(new_window, text=f"Name: {contact.name}")
-    phone = ttk.Label(new_window, text=contact.phone)
-    phone_var = StringVar()
-    input_phone = ttk.Entry(new_window, textvariable=phone_var)
-    #edit_button = ttk.Button(new_window, text="edit", command=lambda: contact.set_email(str(phone_var.get())))
-    edit_button = ttk.Button(new_window, text="edit", command=lambda: edit_window(contact_index))
-    # https://stackoverflow.com/questions/6920302/how-to-pass-arguments-to-a-button-command-in-tkinter
-    name.grid(row=1)
-    phone.grid(row=2)
-    input_phone.grid(row=3)
-    edit_button.grid(row=4)
+    def save_data():
+        print(contact.name, contact.email, contact.displayed)
+        contact.name = name_var.get()
+        contact.surname = surname_var.get()
+        contact.displayed = displayed_var.get()
+        contact.birthday = birthday_var.get()
+        contact.set_email(email_var.get())
+        contact.set_phone(phone_var.get())
+        contact.note = note_var.get()
+        print(contact.name, contact.surname, contact.displayed, contact.birthday, contact.email, contact.phone)
+        write_json()
 
-    # TODO: vracanie udajov z tohto okna
-    # TODO: funkcia na zapisovanie udajov do json suboru, vykona sa po zatvoreni okna kontaktu
-
-def edit_window(contact_index):
-    edit_window = Toplevel(window)
+    contact_window = Toplevel(window)
     contact = contacts[contact_index]
 
     name_var = StringVar()
@@ -76,56 +75,55 @@ def edit_window(contact_index):
     name_var.set(contact.name)
     surname_var.set(contact.surname)
     displayed_var.set(contact.displayed)
+    birthday_var.set(contact.birthday)
     email_var.set(contact.email)
     phone_var.set(contact.phone)
     note_var.set(contact.note)
 
-    text_name = ttk.Label(edit_window, text="Name:")
-    name = ttk.Entry(edit_window, textvariable=name_var)
+    text_name = ttk.Label(contact_window, text="Name:")
+    name = ttk.Entry(contact_window, textvariable=name_var)
     text_name.grid(row=0, column=0)
     name.grid(row=0, column=1)
 
-    text_surname = ttk.Label(edit_window, text="Surname:")
-    surname = ttk.Entry(edit_window, textvariable=surname_var)
+    text_surname = ttk.Label(contact_window, text="Surname:")
+    surname = ttk.Entry(contact_window, textvariable=surname_var)
     text_surname.grid(row=1, column=0)
     surname.grid(row=1, column=1)
 
-    text_displayed = ttk.Label(edit_window, text="Displayed:")
-    displayed = ttk.Entry(edit_window, textvariable=displayed_var)
+    text_displayed = ttk.Label(contact_window, text="Displayed:")
+    displayed = ttk.Entry(contact_window, textvariable=displayed_var)
     text_displayed.grid(row=2, column=0)
     displayed.grid(row=2, column=1)
 
-    text_birthday = ttk.Label(edit_window, text="Birthday:")
-    birthday = ttk.Entry(edit_window, textvariable=birthday_var)
+    text_birthday = ttk.Label(contact_window, text="Birthday:")
+    birthday = ttk.Entry(contact_window, textvariable=birthday_var)
     text_birthday.grid(row=3, column=0)
     birthday.grid(row=3, column=1)
 
-    text_email = ttk.Label(edit_window, text="E-mail:")
-    email = ttk.Entry(edit_window, textvariable=email_var)
+    text_email = ttk.Label(contact_window, text="E-mail:")
+    email = ttk.Entry(contact_window, textvariable=email_var)
     text_email.grid(row=4, column=0)
     email.grid(row=4, column=1)
 
-    text_phone = ttk.Label(edit_window, text="Phone:")
-    phone = ttk.Entry(edit_window, textvariable=phone_var)
+    text_phone = ttk.Label(contact_window, text="Phone:")
+    phone = ttk.Entry(contact_window, textvariable=phone_var)
     text_phone.grid(row=5, column=0)
     phone.grid(row=5, column=1)
 
-    text_note = ttk.Label(edit_window, text="Note:")
-    note = ttk.Entry(edit_window, textvariable=note_var)
+    text_note = ttk.Label(contact_window, text="Note:")
+    note = ttk.Entry(contact_window, textvariable=note_var)
     text_note.grid(row=6, column=0)
     note.grid(row=6, column=1)
 
-    save_button = ttk.Button(edit_window, text="Save", command=lambda: save_data(name_var.get(), surname_var.get(), displayed_var.get(), birthday_var.get(), email_var.get(), phone_var.get(), note_var.get(), contact_index))
+    save_button = ttk.Button(contact_window, text="Save", command=save_data)
     save_button.grid(row=7, column=0)
 
-def save_data(name_var, surname_var, displayed_var, birthday_var, email_var, phone_var, note_var, contact_index):
-    print(name_var, surname_var, displayed_var, birthday_var, email_var, phone_var, note_var, contact_index)
-    # TODO: toto je dost sprosty sposob ukladania dat, pozri na internete tkinter form
 
 def update_tree():
     for i in range(len(contacts)):
         tree.insert(parent="", index="end", values=(contacts[i].displayed, contacts[i].phone, i))
     tree.grid()
+
 
 def open_selected():
     selected = tree.selection()
@@ -135,13 +133,27 @@ def open_selected():
         print(tree.item(i))
         contact_window(tree.item(i)["values"][2])
 
+
+def write_json():
+    with open("contacts.json", "w") as file:
+        #old_data = json.load(file)
+        to_dump = {"contacts": []}
+        for i in contacts:
+            to_dump["contacts"].append({"name": i.name, "surname": i.surname, "displayed": i.displayed,
+                                        "birthday": i.birthday, "email": i.email, "phone": i.phone, "note": i.note})
+        print(to_dump)
+        json.dump(to_dump, file, indent=2)
+
+
 with open("contacts.json", "r") as file:
     obj = json.load(file)
+    print(obj)
     for i in obj["contacts"]:
         contacts.append(Contact(i["name"], i["surname"], i["displayed"], i["birthday"], i["email"], i["phone"],
                                 i["note"]))
     print(type(contacts[0]))
     update_tree()
+
 
 button = ttk.Button(window, text="open selected", command=open_selected)
 button.grid(row = 1)
