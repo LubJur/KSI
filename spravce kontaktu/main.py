@@ -2,7 +2,6 @@
 # https://tkdocs.com/shipman/ttk-Treeview.html
 # https://docs.python.org/3/library/tkinter.ttk.html#treeview
 import json
-from json import JSONEncoder
 import re
 from tkinter import Tk, ttk, Toplevel, StringVar
 from typing import List
@@ -39,27 +38,27 @@ class Contact:
         else:
             print("telefon neplati")
 
-contacts: List[Contact] = []
-
-tree = ttk.Treeview(window, columns=(0, 1))
-
-tree.heading(0, text="Name")
-tree.heading(1, text="Phone")
-
+    # https://stackoverflow.com/questions/48513729/remove-an-object-from-a-list-of-objects
+    def __eq__(self, other):
+        return self.name == other.name
 
 def contact_window(contact_index):
 
     def save_data():
         print(contact.name, contact.email, contact.displayed)
-        contact.name = name_var.get()
-        contact.surname = surname_var.get()
-        contact.displayed = displayed_var.get()
-        contact.birthday = birthday_var.get()
-        contact.set_email(email_var.get())
-        contact.set_phone(phone_var.get())
-        contact.note = note_var.get()
-        print(contact.name, contact.surname, contact.displayed, contact.birthday, contact.email, contact.phone)
-        write_json()
+        if name_var.get() != "":
+            contact.name = name_var.get()
+            contact.surname = surname_var.get()
+            contact.displayed = displayed_var.get()
+            contact.birthday = birthday_var.get()
+            contact.set_email(email_var.get())
+            contact.set_phone(phone_var.get())
+            contact.note = note_var.get()
+            print(contact.name, contact.surname, contact.displayed, contact.birthday, contact.email, contact.phone)
+            add_to_tree()
+            write_json()
+        else:
+            print("contact name is required")
 
     contact_window = Toplevel(window)
     contact = contacts[contact_index]
@@ -119,11 +118,32 @@ def contact_window(contact_index):
     save_button.grid(row=7, column=0)
 
 
-def update_tree():
-    for i in range(len(contacts)):
-        tree.insert(parent="", index="end", values=(contacts[i].displayed, contacts[i].phone, i))
-    tree.grid()
+def add_to_tree():
+    last = len(contacts) - 1  # len starts at 1
+    if contacts[last].name != "":
+        tree.insert(parent="", index="end", values=(contacts[last].name, contacts[last].phone, last))
 
+def delete_from_tree():
+    selected = tree.selection()
+    removed_indexes = []
+    for i in selected:
+        print(tree.item(i)["values"])
+        removed_indexes.append(tree.item(i)["values"][2])
+        tree.delete(i)
+    removed_indexes.reverse()  # we need to delete from contacts backwards because we would get to index out of range
+    # TODO: see if adding atribute IDintree to Contact would be better
+    # TODO: remove also from json
+    for i in removed_indexes:
+        contacts.pop(i)
+    print(contacts)
+
+def add_contact():
+    contacts.append(Contact("", "", "", "", "", "", ""))
+    index_new = len(contacts) - 1
+    contact_window(index_new)  # get last index of contacts
+    print(contacts)
+    #tree.insert(parent="", index="end", values=(contacts[index_new].displayed, contacts[index_new].phone, index_new))
+    #tree.grid()
 
 def open_selected():
     selected = tree.selection()
@@ -141,8 +161,15 @@ def write_json():
         for i in contacts:
             to_dump["contacts"].append({"name": i.name, "surname": i.surname, "displayed": i.displayed,
                                         "birthday": i.birthday, "email": i.email, "phone": i.phone, "note": i.note})
-        print(to_dump)
         json.dump(to_dump, file, indent=2)
+
+
+contacts: List[Contact] = []
+
+tree = ttk.Treeview(window, columns=(0, 1))
+tree.heading(0, text="Name")
+tree.heading(1, text="Phone")
+tree.grid(row=0, columnspan=2)
 
 
 with open("contacts.json", "r") as file:
@@ -151,11 +178,19 @@ with open("contacts.json", "r") as file:
     for i in obj["contacts"]:
         contacts.append(Contact(i["name"], i["surname"], i["displayed"], i["birthday"], i["email"], i["phone"],
                                 i["note"]))
-    print(type(contacts[0]))
-    update_tree()
+    print(contacts)
+    for i in range(len(contacts)):
+        if contacts[i].name != "":
+            tree.insert(parent="", index="end", values=(contacts[i].name, contacts[i].phone, i))
 
 
-button = ttk.Button(window, text="open selected", command=open_selected)
-button.grid(row = 1)
+open_selected = ttk.Button(window, text="open selected", command=open_selected)
+open_selected.grid(row=1, column=0)
+
+add_contact = ttk.Button(window, text="Add contact", command=add_contact)
+add_contact.grid(row=1, column=1)
+
+delete_contact = ttk.Button(window, text="Delete contact", command=delete_from_tree)
+delete_contact.grid(row=1, column=2)
 
 window.mainloop()

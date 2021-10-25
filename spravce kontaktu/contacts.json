@@ -10,13 +10,31 @@
       "note": "This is my kontakt"
     },
     {
-      "name": "Testy",
+      "name": "Testak",
       "surname": "McTestFaceasew",
       "displayed": "Test",
       "birthday": "24.12.2003",
       "email": "test@testy.com",
       "phone": "+4324587442",
       "note": "Test me!"
+    },
+    {
+      "name": "asasda",
+      "surname": "",
+      "displayed": "",
+      "birthday": "",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    {
+      "name": "dsdaw",
+      "surname": "",
+      "displayed": "",
+      "birthday": "",
+      "email": "",
+      "phone": "",
+      "note": ""
     }
   ]
 }
