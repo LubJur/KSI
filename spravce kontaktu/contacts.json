@@ -1,7 +1,7 @@
 {
   "contacts": [
     {
-      "name": "Lubomir",
+      "name": "zLubomir",
       "surname": "Jurcisin",
       "displayed": "Lubko",
       "birthday": "03.05.2003",
@@ -10,7 +10,7 @@
       "note": "This is my kontakt"
     },
     {
-      "name": "Testak",
+      "name": "aTestak",
       "surname": "McTestFaceasew",
       "displayed": "Test",
       "birthday": "24.12.2003",
@@ -28,7 +28,16 @@
       "note": ""
     },
     {
-      "name": "dsdaw",
+      "name": "asdwa",
+      "surname": "",
+      "displayed": "",
+      "birthday": "",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    {
+      "name": "dsawsa",
       "surname": "",
       "displayed": "",
       "birthday": "",

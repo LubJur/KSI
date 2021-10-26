@@ -39,8 +39,6 @@ class Contact:
             print("telefon neplati")
 
     # https://stackoverflow.com/questions/48513729/remove-an-object-from-a-list-of-objects
-    def __eq__(self, other):
-        return self.name == other.name
 
 def contact_window(contact_index):
 
@@ -121,7 +119,8 @@ def contact_window(contact_index):
 def add_to_tree():
     last = len(contacts) - 1  # len starts at 1
     if contacts[last].name != "":
-        tree.insert(parent="", index="end", values=(contacts[last].name, contacts[last].phone, last))
+        print(tree.insert(parent="", index="end", values=(contacts[last].name, contacts[last].phone, last)))
+
 
 def delete_from_tree():
     selected = tree.selection()
@@ -135,7 +134,20 @@ def delete_from_tree():
     # TODO: remove also from json
     for i in removed_indexes:
         contacts.pop(i)
+    #tree.destroy()
+    build_tree(contacts)
     print(contacts)
+
+
+def sort_contacts(ascending):
+    # https://stackoverflow.com/questions/403421/how-to-sort-a-list-of-objects-based-on-an-attribute-of-the-objects
+    if ascending:
+        contacts.sort(key=lambda i: i.name)
+    else:
+        contacts.sort(key=lambda i: i.name, reverse=True)
+    build_tree(contacts)
+
+
 
 def add_contact():
     contacts.append(Contact("", "", "", "", "", "", ""))
@@ -145,6 +157,7 @@ def add_contact():
     #tree.insert(parent="", index="end", values=(contacts[index_new].displayed, contacts[index_new].phone, index_new))
     #tree.grid()
 
+
 def open_selected():
     selected = tree.selection()
     print(selected)
@@ -153,6 +166,11 @@ def open_selected():
         print(tree.item(i))
         contact_window(tree.item(i)["values"][2])
 
+def toggle():
+    if descending:
+        descending_button.config(relief="raised")
+    else:
+        descending_button.config(relief="sunken")
 
 def write_json():
     with open("contacts.json", "w") as file:
@@ -164,13 +182,20 @@ def write_json():
         json.dump(to_dump, file, indent=2)
 
 
+def build_tree(contacts):
+    global tree
+    tree = ttk.Treeview(window, columns=(0, 1))
+    # https://www.py4u.net/discuss/20230
+    tree.heading(0, text="Name", command=sort_contacts)
+    tree.heading(1, text="Phone")
+    tree.grid(row=0, columnspan=2)
+    for i in range(len(contacts)):
+        print(i)
+        if contacts[i].name != "":
+            tree.insert(parent="", index="end", values=(contacts[i].name, contacts[i].phone, i))
+
 contacts: List[Contact] = []
-
-tree = ttk.Treeview(window, columns=(0, 1))
-tree.heading(0, text="Name")
-tree.heading(1, text="Phone")
-tree.grid(row=0, columnspan=2)
-
+descending = False
 
 with open("contacts.json", "r") as file:
     obj = json.load(file)
@@ -179,9 +204,7 @@ with open("contacts.json", "r") as file:
         contacts.append(Contact(i["name"], i["surname"], i["displayed"], i["birthday"], i["email"], i["phone"],
                                 i["note"]))
     print(contacts)
-    for i in range(len(contacts)):
-        if contacts[i].name != "":
-            tree.insert(parent="", index="end", values=(contacts[i].name, contacts[i].phone, i))
+    build_tree(contacts)
 
 
 open_selected = ttk.Button(window, text="open selected", command=open_selected)
@@ -192,5 +215,12 @@ add_contact.grid(row=1, column=1)
 
 delete_contact = ttk.Button(window, text="Delete contact", command=delete_from_tree)
 delete_contact.grid(row=1, column=2)
+
+# https://stackoverflow.com/questions/6920302/how-to-pass-arguments-to-a-button-command-in-tkinter
+descending_button = ttk.Button(window, text="Descending order", command=lambda: sort_contacts(False))
+descending_button.grid(row=1, column=3)
+
+ascending_button = ttk.Button(window, text="Ascending order", command=lambda: sort_contacts(True))
+ascending_button.grid(row=1, column=4)
 
 window.mainloop()
