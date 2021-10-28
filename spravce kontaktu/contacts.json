@@ -17,33 +17,6 @@
       "email": "test@testy.com",
       "phone": "+4324587442",
       "note": "Test me!"
-    },
-    {
-      "name": "asasda",
-      "surname": "",
-      "displayed": "",
-      "birthday": "",
-      "email": "",
-      "phone": "",
-      "note": ""
-    },
-    {
-      "name": "asdwa",
-      "surname": "",
-      "displayed": "",
-      "birthday": "",
-      "email": "",
-      "phone": "",
-      "note": ""
-    },
-    {
-      "name": "dsawsa",
-      "surname": "",
-      "displayed": "",
-      "birthday": "",
-      "email": "",
-      "phone": "",
-      "note": ""
     }
   ]
 }
