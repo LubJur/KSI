@@ -3,11 +3,11 @@
 # https://docs.python.org/3/library/tkinter.ttk.html#treeview
 import json
 import re
-from tkinter import Tk, ttk, Toplevel, StringVar, BooleanVar
+from tkinter import Tk, ttk, Toplevel, StringVar, BooleanVar, messagebox
 from typing import List
+import datetime
 
 window = Tk()
-# window.geometry("800x800")
 window.resizable(False, False)
 
 
@@ -24,19 +24,26 @@ class Contact:
     def set_email(self, email):
         # https://emailregex.com/
         # https://www.geeksforgeeks.org/check-if-email-address-valid-or-not-in-python/
-        if re.fullmatch(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", email):
-            print("plati")
+        # ? at the end so nothing passes too
+        if re.fullmatch(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)?", email):
             self.email = email
         else:
-            print("E-mail is invalid")
+            messagebox.showinfo("Email", "Email must be in something@somethin.something format")
 
     def set_phone(self, phone):
         # https://regex101.com/
-        if re.fullmatch(r"\+[0-9, ]+|[0-9, ]+", phone):
-            print("telefon plati")
+        if re.fullmatch(r"(\+[0-9, ]+|[0-9, ]+)?", phone):
             self.phone = phone
         else:
-            print("telefon neplati")
+            messagebox.showinfo("Phone", "Phone number must only contain numbers, spaces and possibly a + at the "
+                                         "beginning")
+
+    def set_birthday(self, birthday):
+        # https://www.oreilly.com/library/view/regular-expressions-cookbook/9781449327453/ch04s04.html
+        if re.fullmatch(r"(^(3[01]|[12][0-9]|0[1-9])\.(1[0-2]|0[1-9])\.[0-9]{4}$)?", birthday):
+            self.birthday = birthday
+        else:
+            messagebox.showinfo("Birthday", "Birthday date must be in dd.mm.yyyy format")
 
     # https://stackoverflow.com/questions/48513729/remove-an-object-from-a-list-of-objects
 
@@ -48,13 +55,16 @@ def contact_window(contact_index):
             contact.name = name_var.get()
             contact.surname = surname_var.get()
             contact.displayed = displayed_var.get()
-            contact.birthday = birthday_var.get()
+            contact.set_birthday(birthday_var.get())
             contact.set_email(email_var.get())
             contact.set_phone(phone_var.get())
             contact.note = note_var.get()
             print(contact.name, contact.surname, contact.displayed, contact.birthday, contact.email, contact.phone)
-            add_to_tree(contacts, colnames)
             write_json()
+            if not(tree.exists(len(contacts) - 1)):
+                # when adding a new contact, it is at first only in list contacts and not in tree but when editing
+                # it is already in tree so we cant add it, only edit it
+                add_to_tree(contacts, colnames)
         else:
             print("contact name is required")
 
@@ -117,6 +127,9 @@ def contact_window(contact_index):
 
 
 def add_to_tree(contacts, colnames):
+    print("som v add")
+    print(contacts)
+    print(colnames)
     last = len(contacts) - 1  # len starts at 1
     # if contacts[last].name != "":
     #    print(tree.insert(parent="", index="end", values=(contacts[last].name, contacts[last].phone, last)))
@@ -163,6 +176,7 @@ def add_contact():
     contacts.append(Contact("", "", "", "", "", "", ""))
     index_new = len(contacts) - 1
     contact_window(index_new)  # get last index of contacts
+    print(tree.column("name"))
     print(contacts)
     # tree.insert(parent="", index="end", values=(contacts[index_new].displayed, contacts[index_new].phone, index_new))
     # tree.grid()
@@ -198,6 +212,22 @@ def clear(contacts, colnames, find):
     tree.destroy()
     build_tree(contacts, colnames)
 
+def check_birthday(contacts):
+    date = datetime.date.today()
+    print(date)
+    day = str(date)[8:10]
+    month = str(date)[5:7]
+    birthdays = []
+    for contact in contacts:
+        if contact.birthday[0:2] == day and contact.birthday[3:5] == month:
+            print(contact.birthday[0:2])
+            print(contact.birthday[3:5])
+            birthdays.append(f"{contact.name} {contact.surname}")
+    print(birthdays)
+    if len(birthdays) == 1:
+        messagebox.showinfo("Birthdays", f"This person has birthday today: \n{', '.join(birthdays)}")
+    else:
+        messagebox.showinfo("Birthdays", f"These people have birthday today: \n{', '.join(birthdays)}")
 
 def add_column(colnames):
     # colnames.append("note")
@@ -244,6 +274,8 @@ def build_tree(contacts, colnames):
     global tree
     print("staviam strom")
     tree = ttk.Treeview(window, columns=colnames)
+    # https://stackoverflow.com/questions/8688839/remove-empty-first-column-of-a-treeview-object
+    tree["show"] = "headings"
     for i in colnames:
         tree.heading(column=i, text=i)
         tree.column(column=i)
@@ -289,6 +321,7 @@ with open("contacts.json", "r") as file:
     print(contacts)
     build_tree(contacts, colnames)
 
+
 open_selected = ttk.Button(window, text="open selected", command=open_selected)
 open_selected.grid(row=0, column=2)
 
@@ -327,12 +360,17 @@ note_select = ttk.Checkbutton(window, text="Note", variable=note)
 note_select.grid(row=5, column=1)
 
 search_box = ttk.Entry(window, textvariable=find_ttk)
-search_box.grid(row=7, column=0)
+search_box.grid(row=7, column=0, sticky="ew")
 
 search_button = ttk.Button(window, text="Search", command=lambda: search(find_ttk.get()))
 search_button.grid(row=7, column=1)
 
 clear_button = ttk.Button(window, text="Clear", command=lambda: clear(contacts, colnames, find_ttk))
 clear_button.grid(row=7, column=2)
+
+scroll = ttk.Scrollbar(window, orient="vertical", command=tree.yview)
+scroll.grid(rowspan=6, column=8, sticky="ns")
+
+check_birthday(contacts)
 
 window.mainloop()

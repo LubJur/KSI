@@ -1,22 +1,112 @@
 {
   "contacts": [
     {
+      "name": "zLubomir",
+      "surname": "Jurcisin",
+      "displayed": "Lubko",
+      "birthday": "29.10.2003",
+      "email": "jurcisinlubomir@gmail.com",
+      "phone": "+421907928738",
+      "note": "This is my kontakt"
+    },
+    {
       "name": "aLubomir",
-      "surname": "",
+      "surname": "test",
       "displayed": "",
-      "birthday": "03.05.2003",
+      "birthday": "09.10.2003",
       "email": "",
       "phone": "",
       "note": ""
     },
     {
-      "name": "zLubomir",
-      "surname": "Jurcisin",
-      "displayed": "Lubko",
-      "birthday": "03.05.2003",
-      "email": "jurcisinlubomir@gmail.com",
-      "phone": "+421907928738",
-      "note": "This is my kontakt"
+      "name": "sasa",
+      "surname": "daw",
+      "displayed": "saw",
+      "birthday": "",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    {
+      "name": "easd",
+      "surname": "test",
+      "displayed": "wrw",
+      "birthday": "",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    {
+      "name": "dadwa",
+      "surname": "wd",
+      "displayed": "",
+      "birthday": "",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    {
+      "name": "test",
+      "surname": "",
+      "displayed": "",
+      "birthday": "",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    {
+      "name": "dasdw",
+      "surname": "",
+      "displayed": "",
+      "birthday": "",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    {
+      "name": "dawsd",
+      "surname": "",
+      "displayed": "",
+      "birthday": "",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    {
+      "name": "vbcbvc",
+      "surname": "",
+      "displayed": "",
+      "birthday": "",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    {
+      "name": "lblb",
+      "surname": "",
+      "displayed": "",
+      "birthday": "",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    {
+      "name": "dawas",
+      "surname": "",
+      "displayed": "",
+      "birthday": "",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    {
+      "name": "adsad",
+      "surname": "daw",
+      "displayed": "",
+      "birthday": "",
+      "email": "",
+      "phone": "",
+      "note": ""
     }
   ]
 }
