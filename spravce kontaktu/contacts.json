@@ -1,6 +1,15 @@
 {
   "contacts": [
     {
+      "name": "aLubomir",
+      "surname": "",
+      "displayed": "",
+      "birthday": "03.05.2003",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    {
       "name": "zLubomir",
       "surname": "Jurcisin",
       "displayed": "Lubko",
@@ -8,15 +17,6 @@
       "email": "jurcisinlubomir@gmail.com",
       "phone": "+421907928738",
       "note": "This is my kontakt"
-    },
-    {
-      "name": "aTestak",
-      "surname": "McTestFaceasew",
-      "displayed": "Test",
-      "birthday": "24.12.2003",
-      "email": "test@testy.com",
-      "phone": "+4324587442",
-      "note": "Test me!"
     }
   ]
 }

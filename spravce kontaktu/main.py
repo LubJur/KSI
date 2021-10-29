@@ -53,7 +53,7 @@ def contact_window(contact_index):
             contact.set_phone(phone_var.get())
             contact.note = note_var.get()
             print(contact.name, contact.surname, contact.displayed, contact.birthday, contact.email, contact.phone)
-            add_to_tree()
+            add_to_tree(contacts, colnames)
             write_json()
         else:
             print("contact name is required")
@@ -116,10 +116,22 @@ def contact_window(contact_index):
     save_button.grid(row=7, column=0)
 
 
-def add_to_tree():
+def add_to_tree(contacts, colnames):
     last = len(contacts) - 1  # len starts at 1
-    if contacts[last].name != "":
-        print(tree.insert(parent="", index="end", values=(contacts[last].name, contacts[last].phone, last)))
+    # if contacts[last].name != "":
+    #    print(tree.insert(parent="", index="end", values=(contacts[last].name, contacts[last].phone, last)))
+
+    tree.insert(parent="", index="end", iid=last)
+    for i in colnames:
+        tree.set(last, column=i, value=getattr(contacts[last], i))
+    """
+    for i in range(len(contacts)):
+        if contacts[i].name != "":
+            tree.insert(parent="", index="end", iid=i)
+        for j in colnames:
+            # https://stackoverflow.com/questions/3253966/python-string-to-attribute
+            tree.set(i, column=j, value=getattr(contacts[i], j))
+    """
 
 
 def delete_from_tree():
@@ -136,7 +148,7 @@ def delete_from_tree():
     # TODO: remove also from json
     for i in removed_indexes:
         contacts.pop(int(i))
-    build_tree()
+    build_tree(contacts, colnames)
     write_json()
     print(contacts)
 
@@ -144,7 +156,7 @@ def delete_from_tree():
 def sort_contacts(descending):
     # https://stackoverflow.com/questions/403421/how-to-sort-a-list-of-objects-based-on-an-attribute-of-the-objects
     contacts.sort(key=lambda i: i.name, reverse=descending)
-    build_tree()
+    build_tree(contacts, colnames)
 
 
 def add_contact():
@@ -164,6 +176,27 @@ def open_selected():
         print(tree.item(i))
         contact_window(int(i))
         # contact_window(tree.item(i)["values"][2])
+
+
+def search(find):
+    print(find)
+    found_contacts = []
+    if find == "":
+        pass
+    for contact in contacts:
+        contact_atr = [contact.name, contact.surname, contact.displayed, contact.birthday,
+                       contact.email, contact.phone, contact.note]
+        if find in contact_atr:
+            found_contacts.append(contact)
+    if not found_contacts:
+        return
+    build_tree(found_contacts, colnames)
+
+
+def clear(contacts, colnames, find):
+    find.set("")
+    tree.destroy()
+    build_tree(contacts, colnames)
 
 
 def add_column(colnames):
@@ -193,7 +226,7 @@ def add_column(colnames):
     if phone.get() == False and "phone" in colnames:
         colnames.remove("phone")
 
-    if note.get() == False and "note" not in colnames:
+    if note.get() and "note" not in colnames:
         colnames.append("note")
     if note.get() == False and "note" in colnames:
         colnames.remove("note")
@@ -203,13 +236,11 @@ def add_column(colnames):
     # https://www.google.com/search?q=tkinter+treeview+add+column&oq=tkinter+tree+add+colum&aqs=chrome.1.69i57j0i22i30.5943j0j7&sourceid=chrome&ie=UTF-8
     print("pridavam column")
     tree.destroy()
-    build_tree()
+    build_tree(contacts, colnames)
 
 
-colnames = ["name"]
 
-
-def build_tree():
+def build_tree(contacts, colnames):
     global tree
     print("staviam strom")
     tree = ttk.Treeview(window, columns=colnames)
@@ -228,7 +259,6 @@ def build_tree():
 
 def write_json():
     with open("contacts.json", "w") as file:
-        # old_data = json.load(file)
         to_dump = {"contacts": []}
         for i in contacts:
             to_dump["contacts"].append({"name": i.name, "surname": i.surname, "displayed": i.displayed,
@@ -238,6 +268,9 @@ def write_json():
 
 contacts: List[Contact] = []
 descending: bool = False
+
+find_ttk = StringVar()
+colnames = ["name"]
 
 # we need to use BooleanVar instead of bool because clicking one button changes all values
 surname = BooleanVar()
@@ -254,7 +287,7 @@ with open("contacts.json", "r") as file:
         contacts.append(Contact(i["name"], i["surname"], i["displayed"], i["birthday"], i["email"], i["phone"],
                                 i["note"]))
     print(contacts)
-    build_tree()
+    build_tree(contacts, colnames)
 
 open_selected = ttk.Button(window, text="open selected", command=open_selected)
 open_selected.grid(row=0, column=2)
@@ -292,5 +325,14 @@ phone_select.grid(row=4, column=1)
 
 note_select = ttk.Checkbutton(window, text="Note", variable=note)
 note_select.grid(row=5, column=1)
+
+search_box = ttk.Entry(window, textvariable=find_ttk)
+search_box.grid(row=7, column=0)
+
+search_button = ttk.Button(window, text="Search", command=lambda: search(find_ttk.get()))
+search_button.grid(row=7, column=1)
+
+clear_button = ttk.Button(window, text="Clear", command=lambda: clear(contacts, colnames, find_ttk))
+clear_button.grid(row=7, column=2)
 
 window.mainloop()
