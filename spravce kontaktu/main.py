@@ -61,12 +61,14 @@ def contact_window(contact_index):
             contact.note = note_var.get()
             print(contact.name, contact.surname, contact.displayed, contact.birthday, contact.email, contact.phone)
             write_json()
+            tree.destroy()
             build_tree(contacts, colnames)
             if not(tree.exists(len(contacts) - 1)):
                 # when adding a new contact, it is at first only in list contacts and not in tree but when editing
                 # it is already in tree so we cant add it, only edit it
                 add_to_tree(contacts, colnames)
         else:
+            messagebox.showinfo("Name", "Contact name is required")
             print("contact name is required")
 
     contact_window = Toplevel(window)
@@ -194,9 +196,8 @@ def open_selected():
 
 
 def search(find):
-    print(find)
     found_contacts = []
-    global contacts
+    #global contacts
     if find == "":
         pass
     for contact in contacts:
@@ -206,14 +207,17 @@ def search(find):
             found_contacts.append(contact)
     if not found_contacts:
         pass
-    contacts = found_contacts
+    #contacts = found_contacts
     tree.destroy()
     build_tree(found_contacts, colnames)
 
+def destroy_tree():
+    tree.destroy()
 
 def clear(contacts, colnames, find):
     find.set("")
     tree.destroy()
+    """
     with open("contacts.json", "r") as file:
         obj = json.load(file)
         print(obj)
@@ -221,6 +225,7 @@ def clear(contacts, colnames, find):
             contacts.append(Contact(i["name"], i["surname"], i["displayed"], i["birthday"], i["email"], i["phone"],
                                     i["note"]))
         print(contacts)
+    """
     build_tree(contacts, colnames)
 
 def check_birthday(contacts):
@@ -388,5 +393,7 @@ search_button.grid(row=7, column=1)
 clear_button = ttk.Button(window, text="Clear", command=lambda: clear(contacts, colnames, find_ttk))
 clear_button.grid(row=7, column=2)
 
+destroy = ttk.Button(window, text="Destroy", command=destroy_tree)
+destroy.grid(row=7, column=3)
 
 window.mainloop()

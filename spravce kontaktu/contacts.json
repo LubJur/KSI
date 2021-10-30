@@ -1,28 +1,10 @@
 {
   "contacts": [
     {
-      "name": "zLubomir",
-      "surname": "Jurcisin",
-      "displayed": "Lubko",
-      "birthday": "29.10.2003",
-      "email": "jurcisinlubomir@gmail.com",
-      "phone": "+421907928738",
-      "note": "This is my kontakt"
-    },
-    {
       "name": "aLubomir",
-      "surname": "test",
-      "displayed": "",
+      "surname": "",
+      "displayed": "Lubko",
       "birthday": "09.10.2003",
-      "email": "",
-      "phone": "",
-      "note": ""
-    },
-    {
-      "name": "sasa",
-      "surname": "daw",
-      "displayed": "saw",
-      "birthday": "30.10.2021",
       "email": "",
       "phone": "",
       "note": ""
@@ -33,76 +15,13 @@
       "displayed": "wrw",
       "birthday": "",
       "email": "",
-      "phone": "",
-      "note": ""
-    },
-    {
-      "name": "dadwa",
-      "surname": "wd",
-      "displayed": "",
-      "birthday": "30.10.2021",
-      "email": "",
-      "phone": "",
+      "phone": "+86648",
       "note": ""
     },
     {
       "name": "test",
       "surname": "",
-      "displayed": "",
-      "birthday": "",
-      "email": "",
-      "phone": "",
-      "note": ""
-    },
-    {
-      "name": "dasdw",
-      "surname": "",
-      "displayed": "",
-      "birthday": "",
-      "email": "",
-      "phone": "",
-      "note": ""
-    },
-    {
-      "name": "dawsd",
-      "surname": "",
-      "displayed": "",
-      "birthday": "",
-      "email": "",
-      "phone": "",
-      "note": ""
-    },
-    {
-      "name": "vbcbvc",
-      "surname": "",
-      "displayed": "",
-      "birthday": "",
-      "email": "",
-      "phone": "",
-      "note": ""
-    },
-    {
-      "name": "lblb",
-      "surname": "",
-      "displayed": "",
-      "birthday": "",
-      "email": "",
-      "phone": "",
-      "note": ""
-    },
-    {
-      "name": "dawas",
-      "surname": "",
-      "displayed": "",
-      "birthday": "",
-      "email": "",
-      "phone": "",
-      "note": ""
-    },
-    {
-      "name": "adsad",
-      "surname": "daw",
-      "displayed": "",
+      "displayed": "Mctest",
       "birthday": "",
       "email": "",
       "phone": "",
