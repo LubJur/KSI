@@ -61,6 +61,7 @@ def contact_window(contact_index):
             contact.note = note_var.get()
             print(contact.name, contact.surname, contact.displayed, contact.birthday, contact.email, contact.phone)
             write_json()
+            build_tree(contacts, colnames)
             if not(tree.exists(len(contacts) - 1)):
                 # when adding a new contact, it is at first only in list contacts and not in tree but when editing
                 # it is already in tree so we cant add it, only edit it
@@ -195,6 +196,7 @@ def open_selected():
 def search(find):
     print(find)
     found_contacts = []
+    global contacts
     if find == "":
         pass
     for contact in contacts:
@@ -203,13 +205,22 @@ def search(find):
         if find in contact_atr:
             found_contacts.append(contact)
     if not found_contacts:
-        return
+        pass
+    contacts = found_contacts
+    tree.destroy()
     build_tree(found_contacts, colnames)
 
 
 def clear(contacts, colnames, find):
     find.set("")
     tree.destroy()
+    with open("contacts.json", "r") as file:
+        obj = json.load(file)
+        print(obj)
+        for i in obj["contacts"]:
+            contacts.append(Contact(i["name"], i["surname"], i["displayed"], i["birthday"], i["email"], i["phone"],
+                                    i["note"]))
+        print(contacts)
     build_tree(contacts, colnames)
 
 def check_birthday(contacts):
@@ -224,10 +235,11 @@ def check_birthday(contacts):
             print(contact.birthday[3:5])
             birthdays.append(f"{contact.name} {contact.surname}")
     print(birthdays)
-    if len(birthdays) == 1:
-        messagebox.showinfo("Birthdays", f"This person has birthday today: \n{', '.join(birthdays)}")
-    else:
-        messagebox.showinfo("Birthdays", f"These people have birthday today: \n{', '.join(birthdays)}")
+    if birthdays:
+        if len(birthdays) == 1:
+            messagebox.showinfo("Birthdays", f"This person has birthday today: \n{', '.join(birthdays)}")
+        else:
+            messagebox.showinfo("Birthdays", f"These people have birthday today: \n{', '.join(birthdays)}")
 
 def add_column(colnames):
     # colnames.append("note")
@@ -265,8 +277,10 @@ def add_column(colnames):
     # https://stackoverflow.com/questions/43142332/how-can-i-add-a-column-to-a-tkinter-treeview-widget
     # https://www.google.com/search?q=tkinter+treeview+add+column&oq=tkinter+tree+add+colum&aqs=chrome.1.69i57j0i22i30.5943j0j7&sourceid=chrome&ie=UTF-8
     print("pridavam column")
+    #clear()
     tree.destroy()
-    build_tree(contacts, colnames)
+    search(find_ttk.get())
+    #build_tree(contacts, colnames)
 
 
 
@@ -312,14 +326,20 @@ email = BooleanVar()
 phone = BooleanVar()
 note = BooleanVar()
 
-with open("contacts.json", "r") as file:
-    obj = json.load(file)
-    print(obj)
-    for i in obj["contacts"]:
-        contacts.append(Contact(i["name"], i["surname"], i["displayed"], i["birthday"], i["email"], i["phone"],
-                                i["note"]))
-    print(contacts)
+try:
+    with open("contacts.json", "r") as file:
+        obj = json.load(file)
+        print(obj)
+        for i in obj["contacts"]:
+            contacts.append(Contact(i["name"], i["surname"], i["displayed"], i["birthday"], i["email"], i["phone"],
+                                    i["note"]))
+        print(contacts)
+        global tree
+        build_tree(contacts, colnames)
+except FileNotFoundError:
+    contacts = []
     build_tree(contacts, colnames)
+    write_json()
 
 
 open_selected = ttk.Button(window, text="open selected", command=open_selected)
@@ -342,22 +362,22 @@ column_button = ttk.Button(window, text="Add columns", command=lambda: add_colum
 column_button.grid(row=6, column=1)
 
 surname_select = ttk.Checkbutton(window, text="Surnames", variable=surname)
-surname_select.grid(row=0, column=1)
+surname_select.grid(row=0, column=1, sticky="w")
 
 displayed_select = ttk.Checkbutton(window, text="Displayed", variable=displayed)
-displayed_select.grid(row=1, column=1)
+displayed_select.grid(row=1, column=1, sticky="w")
 
 birthday_select = ttk.Checkbutton(window, text="Birthday", variable=birthday)
-birthday_select.grid(row=2, column=1)
+birthday_select.grid(row=2, column=1, sticky="w")
 
 email_select = ttk.Checkbutton(window, text="Email", variable=email)
-email_select.grid(row=3, column=1)
+email_select.grid(row=3, column=1, sticky="w")
 
 phone_select = ttk.Checkbutton(window, text="Phone", variable=phone)
-phone_select.grid(row=4, column=1)
+phone_select.grid(row=4, column=1, sticky="w")
 
 note_select = ttk.Checkbutton(window, text="Note", variable=note)
-note_select.grid(row=5, column=1)
+note_select.grid(row=5, column=1, sticky="w")
 
 search_box = ttk.Entry(window, textvariable=find_ttk)
 search_box.grid(row=7, column=0, sticky="ew")
@@ -368,9 +388,5 @@ search_button.grid(row=7, column=1)
 clear_button = ttk.Button(window, text="Clear", command=lambda: clear(contacts, colnames, find_ttk))
 clear_button.grid(row=7, column=2)
 
-scroll = ttk.Scrollbar(window, orient="vertical", command=tree.yview)
-scroll.grid(rowspan=6, column=8, sticky="ns")
-
-check_birthday(contacts)
 
 window.mainloop()
