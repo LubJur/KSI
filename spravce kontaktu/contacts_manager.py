@@ -13,7 +13,7 @@ window.resizable(False, False)
 
 
 class Contact:
-    def __init__(self, name, surname, displayed, birthday, email, phone, note):
+    def __init__(self, name: str, surname: str, displayed: str, birthday: str, email: str, phone: str, note: str):
         self.name: str = name
         self.surname: str = surname
         self.displayed: str = displayed
@@ -29,7 +29,7 @@ class Contact:
         if re.fullmatch(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)?", email):
             self.email = email
         else:
-            messagebox.showinfo("Email", "Email must be in something@somethin.something format")
+            messagebox.showinfo("Email", "Email must be in something@something.something format")
 
     def set_phone(self, phone):
         # https://regex101.com/
@@ -78,13 +78,13 @@ def contact_window(contact_index):
     else:
         contact = found_contacts[contact_index]
 
-    name_var = StringVar()
-    surname_var = StringVar()
-    displayed_var = StringVar()
-    birthday_var = StringVar()
-    email_var = StringVar()
-    phone_var = StringVar()
-    note_var = StringVar()
+    name_var: StringVar = StringVar()
+    surname_var: StringVar = StringVar()
+    displayed_var: StringVar = StringVar()
+    birthday_var: StringVar = StringVar()
+    email_var: StringVar = StringVar()
+    phone_var: StringVar = StringVar()
+    note_var: StringVar = StringVar()
 
     name_var.set(contact.name)
     surname_var.set(contact.surname)
@@ -133,7 +133,7 @@ def contact_window(contact_index):
     save_button.grid(row=7, column=1)
 
 
-def add_to_tree(contacts, colnames):
+def add_to_tree(contacts: List[Contact], colnames: List[str]):
     last = len(contacts) - 1  # len starts at 1
     tree.insert(parent="", index="end", iid=last)
     for i in colnames:
@@ -153,13 +153,14 @@ def delete_from_tree():
     write_json()
 
 
-def sort_contacts(descending):
+def sort_contacts(descending: bool):
     # https://stackoverflow.com/questions/403421/how-to-sort-a-list-of-objects-based-on-an-attribute-of-the-objects
     contacts.sort(key=lambda i: i.name, reverse=descending)
     build_tree(contacts, colnames)
 
 
 def add_contact():
+    clear(contacts, colnames, find_ttk)
     contacts.append(Contact("", "", "", "", "", "", ""))
     index_new = len(contacts) - 1
     contact_window(index_new)  # get last index of contacts
@@ -172,7 +173,7 @@ def open_selected():
         contact_window(int(i))
 
 
-def search(find):
+def search(find: StringVar):
     global found_contacts
     found_contacts = []
     if find != "":
@@ -189,13 +190,13 @@ def search(find):
         build_tree(found_contacts, colnames)
 
 
-def clear(contacts, colnames, find):
+def clear(contacts: List[Contact], colnames: List[str], find: StringVar):
     find.set("")
     tree.destroy()
     build_tree(contacts, colnames)
 
 
-def check_birthday(contacts):
+def check_birthday(contacts: List[Contact]):
     date = datetime.date.today()
     day = str(date)[8:10]
     month = str(date)[5:7]
@@ -210,43 +211,55 @@ def check_birthday(contacts):
             messagebox.showinfo("Birthdays", f"These people have birthday today: \n{', '.join(birthdays)}")
 
 
-def add_column(colnames):
-    if surname.get() and "surname" not in colnames:
-        colnames.append("surname")
-    if surname.get() == False and "surname" in colnames:
-        colnames.remove("surname")
+def add_column(colnames: List[str]):
+    if surname.get():
+        if "surname" not in colnames:
+            colnames.append("surname")
+    else:
+        if "surname" in colnames:
+            colnames.remove("surname")
 
-    if displayed.get() and "displayed" not in colnames:
-        colnames.append("displayed")
-    if displayed.get() == False and "displayed" in colnames:
-        colnames.remove("displayed")
+    if displayed.get():
+        if "displayed" not in colnames:
+            colnames.append("displayed")
+    else:
+        if "displayed" in colnames:
+            colnames.remove("displayed")
 
-    if birthday.get() and "birthday" not in colnames:
-        colnames.append("birthday")
-    if birthday.get() == False and "birthday" in colnames:
-        colnames.remove("birthday")
+    if birthday.get():
+        if "birthday" not in colnames:
+            colnames.append("birthday")
+    else:
+        if "birthday" in colnames:
+            colnames.remove("birthday")
 
-    if email.get() and "email" not in colnames:
-        colnames.append("email")
-    if email.get() == False and "email" in colnames:
-        colnames.remove("email")
+    if email.get():
+        if "email" not in colnames:
+            colnames.append("email")
+    else:
+        if "email" in colnames:
+            colnames.remove("email")
 
-    if phone.get() and "phone" not in colnames:
-        colnames.append("phone")
-    if phone.get() == False and "phone" in colnames:
-        colnames.remove("phone")
+    if phone.get():
+        if "phone" not in colnames:
+            colnames.append("phone")
+    else:
+        if "phone" in colnames:
+            colnames.remove("phone")
 
-    if note.get() and "note" not in colnames:
-        colnames.append("note")
-    if note.get() == False and "note" in colnames:
-        colnames.remove("note")
+    if note.get():
+        if "note" not in colnames:
+            colnames.append("note")
+    else:
+        if "note" in colnames:
+            colnames.remove("note")
 
     # https://stackoverflow.com/questions/43142332/how-can-i-add-a-column-to-a-tkinter-treeview-widget
     tree.destroy()
     search(find_ttk.get())
 
 
-def build_tree(contacts, colnames):
+def build_tree(contacts: List[Contact], colnames: List[str]):
     global tree
     tree = ttk.Treeview(window, columns=colnames)
     # https://stackoverflow.com/questions/8688839/remove-empty-first-column-of-a-treeview-object
@@ -274,10 +287,11 @@ def write_json():
 
 
 contacts: List[Contact] = []
+found_contacts: List[Contact] = []
 descending: bool = False
 
 find_ttk: StringVar = StringVar()
-colnames = ["name"]
+colnames: List[str] = ["name"]
 
 # we need to use BooleanVar instead of bool because clicking one button changes all values
 surname: BooleanVar = BooleanVar()
@@ -324,12 +338,12 @@ ascending_button = ttk.Button(window, text="Ascending order", command=lambda: so
 ascending_button.grid(row=1, column=4)
 
 descending_button = ttk.Button(window, text="Descending order", command=lambda: sort_contacts(True))
-descending_button.grid(row=2, column=4, padx=1) # padx=1 so it doesnt go over separator
+descending_button.grid(row=2, column=4, padx=1)  # padx=1 so it doesnt go over separator
 
 separator2 = ttk.Separator(window, orient="vertical")
 separator2.grid(row=0, rowspan=7, column=2, sticky="ns")
 
-column_button = ttk.Button(window, text="Add columns", command=lambda: add_column(colnames))
+column_button = ttk.Button(window, text="Show columns", command=lambda: add_column(colnames))
 column_button.grid(row=6, column=1)
 
 surname_select = ttk.Checkbutton(window, text="Surnames", variable=surname)

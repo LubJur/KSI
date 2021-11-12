@@ -1,6 +1,15 @@
 {
   "contacts": [
     {
+      "name": "\u013dubom\u00edr",
+      "surname": "Jur\u010di\u0161in",
+      "displayed": "\u013dubko",
+      "birthday": "03.05.2003",
+      "email": "test@test.com",
+      "phone": "28228 823 283",
+      "note": "Toto je testovy kontakt"
+    },
+    {
       "name": "testy",
       "surname": "mctestgadd",
       "displayed": "asdasd",
@@ -10,13 +19,13 @@
       "note": "dasdwa"
     },
     {
-      "name": "test",
-      "surname": "Mctest",
-      "displayed": "teskt",
-      "birthday": "30.10.2330",
+      "name": "testik",
+      "surname": "tesar",
+      "displayed": "saddfsdfd",
+      "birthday": "03.05.2003",
       "email": "test@test.com",
-      "phone": "+85758",
-      "note": "this is a note"
+      "phone": "65434",
+      "note": "daswdeada"
     },
     {
       "name": "easd",
@@ -25,6 +34,24 @@
       "birthday": "30.10.2853",
       "email": "test@test.com",
       "phone": "+86648",
+      "note": ""
+    },
+    {
+      "name": "teastr",
+      "surname": "teasftz",
+      "displayed": "",
+      "birthday": "01.11.2052",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    {
+      "name": "asdas",
+      "surname": "",
+      "displayed": "",
+      "birthday": "02.11.2023",
+      "email": "",
+      "phone": "",
       "note": ""
     }
   ]
