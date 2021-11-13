@@ -1,7 +1,8 @@
 import socket, pynetstring, base64
 import tkinter
-from tkinter import Tk, ttk, StringVar, IntVar
-import tkinter.filedialog
+from tkinter import Tk, ttk, StringVar, filedialog
+from PIL import ImageTk, Image
+#import tkinter.filedialog
 
 window = Tk()
 
@@ -33,9 +34,11 @@ status = StringVar()
 hostname.set("159.89.4.84")
 port.set(42069)
 name.set("LubJur")
-#password.set("silne_heslo")
+password.set("")
 description.set("nieco")
 isNSFW.set("false")
+filename = ""
+#filename = "E:\Lubomir Jurcisin\Obrázky\w1mt5k97uxq11.jpg"
 meme = base64.b64encode(open("E:\Lubomir Jurcisin\Obrázky\w1mt5k97uxq11.jpg", "rb").read()).decode("ascii")
 
 status.set("Waiting to send meme")
@@ -68,6 +71,7 @@ def connect(hostname, port, name, password, description, isNSFW, meme):
         token = token.decode()[5:-1]
         data_port = s.recv(1024)
         data_port = data_port.decode()[4:-1]
+        #status_txt.destroy()
         status_txt.config(text="Connecting to data channel")
         window.update_idletasks()
 
@@ -77,9 +81,11 @@ def connect(hostname, port, name, password, description, isNSFW, meme):
             data_sum = 0
             data_sum_temp = 0
             len_sent = 0
+            #status_txt.destroy()
             status_txt.config(text="Authenticating")
             window.update_idletasks()
             if d.recv(1024).decode()[5:-1] != token:
+                #status_txt.destroy()
                 status_txt.config(text="ERROR: Tokens do not match")
                 window.update_idletasks()
                 return
@@ -91,83 +97,42 @@ def connect(hostname, port, name, password, description, isNSFW, meme):
 
                 if request[:4] == "ACK:":
                     data_sum_temp = int(request[4:])
-                    print(len_sent, data_sum_temp)
                     if data_sum_temp == len_sent:
                         data_sum += data_sum_temp
                         print("v poriadku")
                     else:
                         print("error")
-                    print(data_sum_temp)
 
                 elif request == "REQ:meme":
+                    #status_txt.destroy()
                     status_txt.config(text="Sending meme...")  # this takes the longest time so it has a status msg
                     window.update_idletasks()
                     d.sendall(pynetstring.encode(f"C {meme}"))
-                    #data_sum_temp = decoder.feed(d.recv(1024))
-                    #data_sum_temp = int(data_sum_temp[0].decode()[6:])
                     len_sent = len(meme)
-                    """
-                    if data_sum_temp != len(meme):
-                        status_txt.config(text="ERROR: Bytes do not match")
-                        window.update_idletasks()
-                        return
-                    else:
-                        data_sum = data_sum + data_sum_temp
-                        status_txt.config(text="Meme sent")
-                        window.update_idletasks()
-                        status = "Memes sent"
-                        print("data sum:", data_sum)
-                    """
+
                 elif request == "REQ:description":
+                    #status_txt.destroy()
+                    status_txt.config(text="Sending description...")
+                    window.update_idletasks()
                     d.sendall(pynetstring.encode(f"C {description}"))
-                    #data_sum_temp = decoder.feed(d.recv(1024))
-                    #data_sum_temp = int(data_sum_temp[0].decode()[6:])
                     len_sent = len(description)
-                    """
-                    if data_sum_temp != len(description):
-                        status_txt.config(text="ERROR: Bytes do not match")
-                        window.update_idletasks()
-                        return
-                    else:
-                        data_sum = data_sum + data_sum_temp
-                        status_txt.config(text="Description sent")
-                        window.update_idletasks()
-                        print("data sum:", data_sum)
-                    """
+
                 elif request == "REQ:isNSFW":
+                    #status_txt.destroy()
+                    status_txt.config(text="Sending NSFW tag...")
+                    window.update_idletasks()
                     d.sendall(pynetstring.encode(f"C {isNSFW}"))
-                    #data_sum_temp = decoder.feed(d.recv(1024))
-                    print(data_sum_temp)
                     len_sent = len(isNSFW)
-                    #data_sum_temp = int(data_sum_temp[0].decode()[6:])
-                    """
-                    if data_sum_temp != len(isNSFW):
-                        status_txt.config(text="ERROR: Bytes do not match")
-                        window.update_idletasks()
-                        return
-                    else:
-                        data_sum = data_sum + data_sum_temp
-                        status_txt.config(text="NSFW flag sent")
-                        window.update_idletasks()
-                        print("data sum:", data_sum)
-                    """
+
                 elif request == "REQ:password":
+                    #status_txt.destroy()
+                    status_txt.config(text="Sending password...")
+                    window.update_idletasks()
                     d.sendall(pynetstring.encode(f"C {password}"))
-                    #data_sum_temp = decoder.feed(d.recv(1024))
-                    #data_sum_temp = int(data_sum_temp[0].decode()[6:])
                     len_sent = len(password)
-                    """
-                    if data_sum_temp != len(password):
-                        status_txt.config(text="ERROR: Bytes do not match")
-                        window.update_idletasks()
-                        return
-                    else:
-                        data_sum = data_sum + data_sum_temp
-                        status_txt.config(text="Password sent")
-                        window.update_idletasks()
-                        print("data sum:", data_sum)
-                    """
+
                 elif request[0:3] == "END":
+                    #status_txt.destroy()
                     status_txt.config(text="Finishing sending")
                     window.update_idletasks()
                     data_token = request
@@ -177,15 +142,17 @@ def connect(hostname, port, name, password, description, isNSFW, meme):
 
                 else:
                     print(request[1:])
+                    #status_txt.destroy()
                     status_txt.config(text=f"ERROR: {request[1:]}")
                     window.update_idletasks()
-                    print("nastala chyba pri posielani dat")
+                    print("nastala chyba pri posielaní dat")
                     return
 
         msglen = decoder.feed(s.recv(1024))
         msglen = msglen[0].decode()[2:]
         print("sucet_dat", msglen)
         if int(msglen) != data_sum:
+            #status_txt.destroy()
             status_txt.config(text="ERROR: Not all data sent")
             window.update_idletasks()
             print("Neboli poslane vsetky dáta")
@@ -194,6 +161,7 @@ def connect(hostname, port, name, password, description, isNSFW, meme):
         success = decoder.feed(s.recv(1024))
         success = success[0].decode()[2:]
         if success == "ACK":
+            #status_txt.destroy()
             status_txt.config(text="SUCCESS")
             window.update_idletasks()
             status = "Successfully sent meme"
@@ -202,10 +170,13 @@ def connect(hostname, port, name, password, description, isNSFW, meme):
 
 
 def browseFiles():
+    # https://stackoverflow.com/questions/10133856/how-to-add-an-image-in-tkinter
+    global meme, filename
     filename = tkinter.filedialog.askopenfilename(filetypes=[("jpeg files", "*.jpg"), ("png files", "*.png")])
-    global meme
     meme = base64.b64encode(open(filename, "rb").read()).decode("ascii")
-    print(filename)
+    filename = ImageTk.PhotoImage(Image.open(filename).resize((400, 400)))
+    preview = ttk.Label(window, image=filename)
+    preview.grid(row=6, column=1, columnspan=4)
 
 
 ip_label = ttk.Label(window, text="IP address:")
@@ -239,7 +210,7 @@ description_label = ttk.Label(window, text="Description:")
 description_label.grid(row=4, column=1)
 
 description_entry = ttk.Entry(window, textvariable=description)
-description_entry.grid(row=4, column=2, rowspan=1, columnspan=3, ipadx=50)
+description_entry.grid(row=4, column=2, rowspan=1, columnspan=4, ipadx=90)
 
 browse_btn = ttk.Button(window, text="Browse", command=browseFiles)
 browse_btn.grid(row=5, column=1)
@@ -249,5 +220,7 @@ status_txt.grid(row=5, column=2, columnspan=2)
 
 send_btn = ttk.Button(window, text="Send", command=lambda: connect(hostname.get(), int(port.get()), name.get(), password.get(), description.get(), isNSFW.get(), meme))
 send_btn.grid(row=5, column=4)
+
+
 
 window.mainloop()
