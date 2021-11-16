@@ -2,25 +2,13 @@ import socket, pynetstring, base64
 import tkinter
 from tkinter import Tk, ttk, StringVar, filedialog
 from PIL import ImageTk, Image
-#import tkinter.filedialog
 
 window = Tk()
+window.resizable(False, False)
+window.title("MTP client")
 
 decoder = pynetstring.Decoder()
-"""
-hostname = "159.89.4.84"
-port = 42069
-name = "LubJur"
-password = "silne_heslo"
-description = "nieco"
-isNSFW = "false"
-meme = base64.b64encode(open("/home/lubomir/Pictures/drog.png", "rb").read()).decode("ascii")
-token = ""
-data_port = 0
-data_token = ""
-data_sum = 0
-status = ""
-"""
+
 
 hostname = tkinter.StringVar()
 port = tkinter.StringVar()
@@ -33,61 +21,74 @@ status = StringVar()
 
 hostname.set("159.89.4.84")
 port.set(42069)
-name.set("LubJur")
+name.set("")
 password.set("")
-description.set("nieco")
+description.set("")
 isNSFW.set("false")
 filename = ""
-#filename = "E:\Lubomir Jurcisin\Obrázky\w1mt5k97uxq11.jpg"
-meme = base64.b64encode(open("E:\Lubomir Jurcisin\Obrázky\w1mt5k97uxq11.jpg", "rb").read()).decode("ascii")
-
-status.set("Waiting to send meme")
 
 
 def check_data(hostname, port, name, password, description, isNSFW, meme):
-    print(type(port))
-    print(port)
-    print(port > 65535 or port < 0)
+    if description == "":
+        # server is expecting data in format C <data>, we cant pass nothing even though string is empty
+        description = " "
+
     if type(port) != int or (port > 65535 or port < 0):
-        status_txt.config(text="ERROR: Port must be a number from 0 to 65535")
+        status.set("ERROR: Port must be a number from 0 to 65535")
+        window.update_idletasks()
+        return
+    elif hostname == "":
+        status.set("ERROR: Hostname must not be empty")
+        window.update_idletasks()
+        return
+    elif name == "":
+        status.set("ERROR: Nick must not be empty")
+        window.update_idletasks()
+        return
+    elif password == "":
+        status.set("ERROR: Password must not be empty")
+        window.update_idletasks()
+        return
+    elif meme == "":
+        status.set("ERROR: You must choose a meme")
         window.update_idletasks()
         return
     else:
+        send_btn["state"] = "disabled"
         connect(hostname, port, name, password, description, isNSFW, meme)
 
 
 def connect(hostname, port, name, password, description, isNSFW, meme):
-    token = ""
-    data_port = 0
-    data_token = ""
-    data_sum = 0
-    global status
+    global status, status_txt
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        status.set("Connecting...")
+        window.update()  # https://stackoverflow.com/questions/24167053/tkinter-label-doesnt-update
         s.connect((hostname, port))
         s.sendall(pynetstring.encode("C MTP V:1.0"))
-        data = s.recv(1024)
+        data = s.recv(1024).decode()
+        if data != "11:S MTP V:1.0,":
+            status.set("ERROR: Server is not responding")
+            window.update()
+            send_btn["state"] = "enable"
+            return
         s.sendall(pynetstring.encode(f"C {name}"))
+
         token = s.recv(1024)
         token = token.decode()[5:-1]
         data_port = s.recv(1024)
         data_port = data_port.decode()[4:-1]
-        #status_txt.destroy()
-        status_txt.config(text="Connecting to data channel")
-        window.update_idletasks()
+        status.set("Sending data...")
+        window.update()
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as d:
             d.connect((hostname, int(data_port)))
             d.sendall(pynetstring.encode(f"C {name}"))
             data_sum = 0
-            data_sum_temp = 0
             len_sent = 0
-            #status_txt.destroy()
-            status_txt.config(text="Authenticating")
-            window.update_idletasks()
             if d.recv(1024).decode()[5:-1] != token:
-                #status_txt.destroy()
-                status_txt.config(text="ERROR: Tokens do not match")
-                window.update_idletasks()
+                status.set("ERROR: Tokens do not match")
+                window.update()
+                send_btn["state"] = "enable"
                 return
 
             while True:
@@ -99,73 +100,60 @@ def connect(hostname, port, name, password, description, isNSFW, meme):
                     data_sum_temp = int(request[4:])
                     if data_sum_temp == len_sent:
                         data_sum += data_sum_temp
-                        print("v poriadku")
                     else:
-                        print("error")
+                        status.set("ERROR: not all data sent")
+                        window.update()
+                        send_btn["state"] = "enable"
+                        return
 
                 elif request == "REQ:meme":
-                    #status_txt.destroy()
-                    status_txt.config(text="Sending meme...")  # this takes the longest time so it has a status msg
-                    window.update_idletasks()
+                    status.set("Sending meme...")
                     d.sendall(pynetstring.encode(f"C {meme}"))
                     len_sent = len(meme)
 
                 elif request == "REQ:description":
-                    #status_txt.destroy()
-                    status_txt.config(text="Sending description...")
-                    window.update_idletasks()
+                    status.set("Sending description...")
                     d.sendall(pynetstring.encode(f"C {description}"))
                     len_sent = len(description)
 
                 elif request == "REQ:isNSFW":
-                    #status_txt.destroy()
-                    status_txt.config(text="Sending NSFW tag...")
-                    window.update_idletasks()
+                    status.set("Sending NSFW tag...")
                     d.sendall(pynetstring.encode(f"C {isNSFW}"))
                     len_sent = len(isNSFW)
 
                 elif request == "REQ:password":
-                    #status_txt.destroy()
-                    status_txt.config(text="Sending password...")
-                    window.update_idletasks()
+                    status.set("Sending password...")
                     d.sendall(pynetstring.encode(f"C {password}"))
                     len_sent = len(password)
 
                 elif request[0:3] == "END":
-                    #status_txt.destroy()
-                    status_txt.config(text="Finishing sending")
-                    window.update_idletasks()
-                    data_token = request
-                    data_token = data_token[4:]
+                    data_token = request[4:]
                     print("data_token:", data_token)
                     break
 
                 else:
-                    print(request[1:])
-                    #status_txt.destroy()
-                    status_txt.config(text=f"ERROR: {request[1:]}")
-                    window.update_idletasks()
-                    print("nastala chyba pri posielaní dat")
+                    status.set(f"ERROR: {request}")
+                    window.update()
+                    send_btn["state"] = "enable"
                     return
+                window.update()
 
         msglen = decoder.feed(s.recv(1024))
         msglen = msglen[0].decode()[2:]
-        print("sucet_dat", msglen)
+        print("data_sent:", msglen)
         if int(msglen) != data_sum:
-            #status_txt.destroy()
-            status_txt.config(text="ERROR: Not all data sent")
-            window.update_idletasks()
-            print("Neboli poslane vsetky dáta")
+            status.set("ERROR: Not all data sent")
+            window.update()
+            send_btn["state"] = "enable"
             return
         s.sendall(pynetstring.encode(f"C {data_token}"))
         success = decoder.feed(s.recv(1024))
         success = success[0].decode()[2:]
         if success == "ACK":
-            #status_txt.destroy()
-            status_txt.config(text="SUCCESS")
-            window.update_idletasks()
-            status = "Successfully sent meme"
+            status.set("SUCCESS")
+            window.update()
             print("SUCCESS")
+            send_btn["state"] = "enable"
 
 
 
@@ -173,10 +161,14 @@ def browseFiles():
     # https://stackoverflow.com/questions/10133856/how-to-add-an-image-in-tkinter
     global meme, filename
     filename = tkinter.filedialog.askopenfilename(filetypes=[("jpeg files", "*.jpg"), ("png files", "*.png")])
-    meme = base64.b64encode(open(filename, "rb").read()).decode("ascii")
-    filename = ImageTk.PhotoImage(Image.open(filename).resize((400, 400)))
-    preview = ttk.Label(window, image=filename)
-    preview.grid(row=6, column=1, columnspan=4)
+    if filename != "":
+        meme = base64.b64encode(open(filename, "rb").read()).decode("ascii")
+        filename = ImageTk.PhotoImage(Image.open(filename).resize((400, 400)))
+        preview = ttk.Label(window, image=filename)
+        preview.grid(row=6, column=1, columnspan=4)
+    else:
+        filename = ""
+        meme = ""
 
 
 ip_label = ttk.Label(window, text="IP address:")
@@ -191,36 +183,36 @@ port_label.grid(row=1, column=3)
 port_entry = ttk.Entry(window, textvariable=port)
 port_entry.grid(row=1, column=4)
 
-nick_label = ttk.Label(window, text="nick:")
+nick_label = ttk.Label(window, text="Nick:")
 nick_label.grid(row=2, column=1)
 
 nick_entry = ttk.Entry(window, textvariable=name)
 nick_entry.grid(row=2, column=2)
 
-password_label = ttk.Label(window, text="password:")
+password_label = ttk.Label(window, text="Password:")
 password_label.grid(row=2, column=3)
 
 password_entry = ttk.Entry(window, textvariable=password)
 password_entry.grid(row=2, column=4)
 
-nsfw_check = ttk.Checkbutton(window, text="NSFW", variable=isNSFW)
+nsfw_check = ttk.Checkbutton(window, text="NSFW", variable=isNSFW, onvalue="true", offvalue="false")
 nsfw_check.grid(row=3, column=1)
 
 description_label = ttk.Label(window, text="Description:")
 description_label.grid(row=4, column=1)
 
 description_entry = ttk.Entry(window, textvariable=description)
-description_entry.grid(row=4, column=2, rowspan=1, columnspan=4, ipadx=90)
+description_entry.grid(row=4, column=2, rowspan=1, columnspan=3, sticky="ew")
 
 browse_btn = ttk.Button(window, text="Browse", command=browseFiles)
 browse_btn.grid(row=5, column=1)
 
-status_txt = ttk.Label(window, text="status")
-status_txt.grid(row=5, column=2, columnspan=2)
+status_txt = ttk.Label(window, textvariable=status)
+status_txt.grid(row=5, column=2, columnspan=3, sticky="w")
 
-send_btn = ttk.Button(window, text="Send", command=lambda: connect(hostname.get(), int(port.get()), name.get(), password.get(), description.get(), isNSFW.get(), meme))
-send_btn.grid(row=5, column=4)
-
-
+send_btn = ttk.Button(window, text="Send",
+                      command=lambda: check_data(hostname.get(), int(port.get()), name.get(), password.get(),
+                                                 description.get(), isNSFW.get(), meme))
+send_btn.grid(row=5, column=4, sticky="ew")
 
 window.mainloop()
