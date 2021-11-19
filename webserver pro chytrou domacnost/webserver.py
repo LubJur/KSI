@@ -1,6 +1,6 @@
 # TODO: Automatizacia
 # TODO: automaticke zapinanie svetla kuchyne a chodby podla senzora pohybu
-# TODO: Pri zapade slnka 6500K -> 2300K, pri vychode naopak
+# TODO: Pri zapade slnka 6500K -> 2300K, pri vychode naopak, 47K za minutu pocas pol hodiny https://michelanders.blogspot.com/2010/12/calulating-sunrise-and-sunset-in-python.html
 # TODO: Ovladanie svetiel pomocou smart vypinacou priamo, bez servera
 # TODO: Vzdialene vypinanie svetiel v miestnosti (nie ale v rozdielnych izbach)
 # TODO: rozdelenie ceny za plyn podla toho ako dlho v ich izbe svietilo svetlo
@@ -14,73 +14,48 @@
 
 from flask import Flask, request, url_for, abort, jsonify
 import requests
+from json import loads
+from datetime import datetime
 import time
 from uuid import uuid4
 
 app = Flask("webserver")
 
-@app.route("/newSmartLight")
-def newSmartLight():
-    #if request.method == "GET":
-    uuid = uuid4()
-    print(uuid)
-    answer = {
-        "actions": {
-            "change_color_blue_sky": f"http://localhost:5000/device/{uuid}/color_temperature/10000",
-            "change_color_high_noon": f"http://localhost:5000/device/{uuid}/color_temperature/5000",
-            "change_color_sunset": f"http://localhost:5000/device/{uuid}/color_temperature/3500",
-            "device_info": f"http://localhost:5000/device/{uuid}",
-            "set_notes_POST": f"http://localhost:5000/device/{uuid}/notes",
-            "toggle_state": f"http://localhost:5000/device/{uuid}/toggle",
-            "turn_off": f"http://localhost:5000/device/{uuid}/state/off",
-            "turn_on": f"http://localhost:5000/device/{uuid}/state/on"
-        },
-        "color_temperature": 5000,
-        "current_state": False,
-        "id": uuid,
-        "notes": "",
-        "power_usage": 0,
-        "power_usage_coefficient": 100,
-        "power_usage_last_recalculated": 0,
-        "type": "SmartLight"
-    }
-    return jsonify(answer)
+lights_id = {"obyvakLight": 0, "koupelnaLight": 0, "kuchyneLight": 0, "karsobLight": 0, "karlikLight": 0,
+           "karlosLight": 0, "juliaLight": 0}
+switches_id = {"obyvakSwitch": 0, "koupelnaSwitch": 0, "kuchyneSwitch": 0, "karsobSwitch": 0, "karlikSwitch": 0,
+           "karlosSwitch": 0, "juliaSwitch": 0}
+motion_id = {"obyvakMotion": 0, "kuchyneMotion": 0}
+"""
+for light in lights_id:
+    print(light)
+    get_response = requests.get("https://home_automation.iamroot.eu/newSmartLight")
+    id = loads(get_response.text)["id"]
+    lights_id.update({light: id})
 
-@app.route("/newMotionSensor")
-def newMotionSensor():
-    uuid = uuid4()
-    answer = {
-        "actions": {
-            "change_report_url": f"http://localhost:5000/device/{uuid}/report_url?url=http%3A%2F%2Fhome_automation.iamroot.eu%2Fdevice%2Fb28cd825-0fbc-483b-b22c-5b27e4d85c79%2Fevent",
-            "device_info": f"http://localhost:5000/device/{uuid}",
-            "set_notes_POST": f"http://localhost:5000/device/{uuid}/notes",
-            "trigger_report": f"http://localhost:5000/device/{uuid}/trigger"
-        },
-        "collector_url": f"http://localhost:5000/device/{uuid}/event",
-        "id": uuid,
-        "last_triggered_timestamp": 0,
-        "notes": "",
-        "type": "MotionSensor"
-    }
-    return jsonify(answer)
+for switch in switches_id:
+    print(switch)
+    get_response = requests.get("https://home_automation.iamroot.eu/newSwitchSensor")
+    id = loads(get_response.text)["id"]
+    switches_id.update({switch: id})
 
-@app.route("/newSwitchSensor")
-def newSwitchSensor():
-    uuid = uuid4()
-    answer = {
-        "actions": {
-            "change_report_url": f"http://localhost:5000/device/{uuid}/report_url?url=http%3A%2F%2Fhome_automation.iamroot.eu%2Fdevice%2F4dfe3f5a-8d40-44d5-b33b-c110c07a92a3%2Fevent",
-            "device_info": f"http://localhost:5000/device/{uuid}",
-            "set_notes_POST": f"http://localhost:5000/device/{uuid}/notes",
-            "trigger_report": f"http://localhost:5000/device/{uuid}/trigger"
-        },
-        "collfector_url": f"http://localhost:5000/device/{uuid}/event",
-        "current_state": False,
-        "id": uuid,
-        "notes": "",
-        "power_usage": 0,
-        "power_usage_coefficient": 100,
-        "power_usage_last_recalculated": 1637265681,
-        "type": "SwitchSensor"
-    }
-    return jsonify(answer)
+for motion in motion_id:
+    print(motion)
+    get_response = requests.get("https://home_automation.iamroot.eu/newMotionSensor")
+    id = loads(get_response.text)["id"]
+    motion_id.update({motion: id})
+
+"""
+
+print(datetime.now().time())  # https://www.programiz.com/python-programming/datetime/current-time
+if datetime.now().time()[:2] > 17:
+    color = 6500
+
+
+for i in lights_id.items():
+    print(i)
+for i in switches_id.items():
+    print(i)
+for i in motion_id.items():
+    print(i)
+
