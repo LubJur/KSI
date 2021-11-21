@@ -12,7 +12,7 @@
 # TODO: formular cez ktory sa mozu spolubyvajuci prihlasit
 # TODO: zoznam s tlacidlami na ovladanie svetiel pre kazdeho spolubyvajuceho, mozu zapnut len svoje alebo spolocne
 
-from flask import Flask, request, url_for, abort, jsonify
+from flask import Flask, request, url_for, abort, jsonify, render_template, escape
 import requests
 from json import loads
 from datetime import datetime
@@ -26,13 +26,13 @@ switches_id = {"obyvakSwitch": 0, "koupelnaSwitch": 0, "kuchyneSwitch": 0, "kars
            "karlosSwitch": 0, "juliaSwitch": 0}
 motion_id = {"obyvakMotion": 0, "kuchyneMotion": 0}
 
-
 for light in lights_id:
     print(light)
     get_response = requests.get("https://home_automation.iamroot.eu/newSmartLight")
     id = loads(get_response.text)["id"]
     lights_id.update({light: id})
 """
+
 for switch in switches_id:
     print(switch)
     get_response = requests.get("https://home_automation.iamroot.eu/newSwitchSensor")
@@ -47,33 +47,58 @@ for motion in motion_id:
 
 """
 
-print(datetime.now().time())  # https://www.programiz.com/python-programming/datetime/current-time
-sunset = 18
-sunrise = 6
-proportion_color = 4200
-now_time = str(datetime.now().time())
-now_time = int(now_time[:2])*60 + int(now_time[3:5])
-print(now_time)
-if now_time > sunset*60:  # 17:00
-    time_before = now_time
-    while now_time < sunset*60 + 90:  # 18:30
-        now_time = str(datetime.now().time())
-        now_time = int(now_time[:2]) * 60 + int(now_time[3:5])
-        if time_before + 1 < now_time:
-            time_before = now_time
-            proportion_color -= 47 #235
-            for light in lights_id:
-                id = lights_id[light]
-                time.sleep(0.2)
-                print("idem poslat request")
-                get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}/color_temperature/{2300+proportion_color}")
-                print(loads(get_response.text))
+# zmena farby svetla podla casu
+@app.route("/cron")
+def change_color():
+    print(datetime.now().time())  # https://www.programiz.com/python-programming/datetime/current-time
+    sunset = 17
+    sunrise = 6
+    proportion_color = 4200
+    now_time = str(datetime.now().time())
+    now_time = int(now_time[:2])*60 + int(now_time[3:5])
+    print(now_time)
+    if sunset*60 + 90 > now_time > sunset*60:  # 17:00
+        time_before = now_time
+        while now_time < sunset*60 + 90:  # 18:30
+            now_time = str(datetime.now().time())
+            now_time = int(now_time[:2]) * 60 + int(now_time[3:5])
+            if time_before + 5 < now_time:
+                time_before = now_time
+                proportion_color -= 235
+                for light in lights_id:
+                    id = lights_id[light]
+                    time.sleep(0.2)
+                    print("idem poslat request")
+                    get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}/color_temperature/{2300+proportion_color}")
+                    print(loads(get_response.text))
+
+    elif sunrise*60 + 90 > now_time > sunrise*60:  # 6:00
+        time_before = now_time
+        while now_time < sunrise*60 + 90:  # 7:30
+            now_time = str(datetime.now().time())
+            now_time = int(now_time[:2]) * 60 + int(now_time[3:5])
+            if time_before + 5 < now_time:
+                time_before = now_time
+                proportion_color += 235
+                for light in lights_id:
+                    id = lights_id[light]
+                    time.sleep(0.2)
+                    print("idem poslat request")
+                    get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}/color_temperature/{2300+proportion_color}")
+                    print(loads(get_response.text))
+
+@app.route("/<device>/info")
+def toggle_light(device):
+    id = escape(device)
+    get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}/toggle")
+    print("som tu", get_response.text)
+    return loads(get_response.text)["current_state"]
 
 
 
-    minutes = datetime.now().time()
-    print(minutes)
-
+@app.route("/")
+def devices():
+    return render_template("flat_map.html", lights_id=lights_id)
 
 
 for i in lights_id.items():

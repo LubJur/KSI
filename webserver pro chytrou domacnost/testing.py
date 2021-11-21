@@ -56,7 +56,7 @@ def newSwitchSensor():
             "set_notes_POST": f"http://localhost:5000/device/{uuid}/notes",
             "trigger_report": f"http://localhost:5000/device/{uuid}/trigger"
         },
-        "collfector_url": f"http://localhost:5000/device/{uuid}/event",
+        "collector_url": f"http://localhost:5000/device/{uuid}/event",
         "current_state": False,
         "id": uuid,
         "notes": "",
