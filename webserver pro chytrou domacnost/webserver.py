@@ -21,9 +21,9 @@ import time
 app = Flask("webserver")
 
 lights_id = {"obyvakLight": 0, "koupelnaLight": 0, "kuchyneLight": 0, "karsobLight": 0, "karlikLight": 0,
-           "karlosLight": 0, "juliaLight": 0}
+             "karlosLight": 0, "juliaLight": 0}
 switches_id = {"obyvakSwitch": 0, "koupelnaSwitch": 0, "kuchyneSwitch": 0, "karsobSwitch": 0, "karlikSwitch": 0,
-           "karlosSwitch": 0, "juliaSwitch": 0}
+               "karlosSwitch": 0, "juliaSwitch": 0}
 motion_id = {"obyvakMotion": 0, "kuchyneMotion": 0}
 
 for light in lights_id:
@@ -47,6 +47,7 @@ for motion in motion_id:
 
 """
 
+
 # zmena farby svetla podla casu
 @app.route("/cron")
 def change_color():
@@ -55,11 +56,11 @@ def change_color():
     sunrise = 6
     proportion_color = 4200
     now_time = str(datetime.now().time())
-    now_time = int(now_time[:2])*60 + int(now_time[3:5])
+    now_time = int(now_time[:2]) * 60 + int(now_time[3:5])
     print(now_time)
-    if sunset*60 + 90 > now_time > sunset*60:  # 17:00
+    if sunset * 60 + 90 > now_time > sunset * 60:  # 17:00
         time_before = now_time
-        while now_time < sunset*60 + 90:  # 18:30
+        while now_time < sunset * 60 + 90:  # 18:30
             now_time = str(datetime.now().time())
             now_time = int(now_time[:2]) * 60 + int(now_time[3:5])
             if time_before + 5 < now_time:
@@ -69,12 +70,13 @@ def change_color():
                     id = lights_id[light]
                     time.sleep(0.2)
                     print("idem poslat request")
-                    get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}/color_temperature/{2300+proportion_color}")
+                    get_response = requests.get(
+                        f"https://home_automation.iamroot.eu/device/{id}/color_temperature/{2300 + proportion_color}")
                     print(loads(get_response.text))
 
-    elif sunrise*60 + 90 > now_time > sunrise*60:  # 6:00
+    elif sunrise * 60 + 90 > now_time > sunrise * 60:  # 6:00
         time_before = now_time
-        while now_time < sunrise*60 + 90:  # 7:30
+        while now_time < sunrise * 60 + 90:  # 7:30
             now_time = str(datetime.now().time())
             now_time = int(now_time[:2]) * 60 + int(now_time[3:5])
             if time_before + 5 < now_time:
@@ -84,21 +86,74 @@ def change_color():
                     id = lights_id[light]
                     time.sleep(0.2)
                     print("idem poslat request")
-                    get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}/color_temperature/{2300+proportion_color}")
+                    get_response = requests.get(
+                        f"https://home_automation.iamroot.eu/device/{id}/color_temperature/{2300 + proportion_color}")
                     print(loads(get_response.text))
+
 
 @app.route("/<device>/info")
 def toggle_light(device):
     id = escape(device)
+    print("som tu 1")
     get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}/toggle")
-    print("som tu", get_response.text)
+    print("som tu 2", get_response.text)
     return loads(get_response.text)["current_state"]
 
 
-
-@app.route("/")
+@app.route("/map")
 def devices():
-    return render_template("flat_map.html", lights_id=lights_id)
+    return render_template("devices.html", lights_id=lights_id)
+
+
+karsob = {"lights": lights_id, "switches": switches_id}
+karlos = {"lights": {"karlosLight": lights_id["karlosLight"], "kuchyneLight": lights_id["kuchyneLight"],
+                     "obyvakLight": lights_id["obyvakLight"]},
+          "switches": {"karlosSwitch": switches_id["karlosSwitch"], "kuchyneSwitch": switches_id["kuchyneSwitch"],
+                       "obyvakSwitch": switches_id["obyvakSwitch"]}}
+julia = {"lights": {"juliaLight": lights_id["juliaLight"], "kuchyneLight": lights_id["kuchyneLight"],
+                    "obyvakLight": lights_id["obyvakLight"]},
+         "switches": {"juliaSwitch": switches_id["juliaSwitch"], "kuchyneSwitch": switches_id["kuchyneSwitch"],
+                      "obyvakSwitch": switches_id["obyvakSwitch"]}}
+karlik = {"lights": {"karlikLight": lights_id["karlikLight"], "kuchyneLight": lights_id["kuchyneLight"],
+                     "obyvakLight": lights_id["obyvakLight"]},
+          "switches": {"karlikSwitch": switches_id["karlikSwitch"], "kuchyneSwitch": switches_id["kuchyneSwitch"],
+                       "obyvakSwitch": switches_id["obyvakSwitch"]}}
+
+
+def show_register_page() -> str:
+    return f"""
+    <form action="{url_for('register')}" method="post">
+        Username: <input type="text" name="username"><br>
+        Password: <input type="password" name="password"><br>
+        <input type="submit">
+    </form>
+    """
+
+
+def handle_register(register_form):
+    print(register_form["username"], register_form["password"])
+    username = register_form["username"]
+    password = register_form["password"]
+    if username == "karsob" and password == "karsob":
+        return render_template("devices.html", lights_id=karsob["lights"])
+    elif username == "karlos" and password == "karlos":
+        return render_template("devices.html", lights_id=karlos["lights"])
+    elif username == "julia" and password == "julia":
+        return render_template("devices.html", lights_id=julia["lights"])
+    elif username == "karlik" and password == "karlik":
+        return render_template("devices.html", lights_id=karlik["lights"])
+    else:
+        return f"""
+        Invalid login 
+        """
+
+
+@app.route("/", methods=["POST", "GET"])
+def register():
+    if request.method == "POST":
+        return handle_register(request.form)
+    else:
+        return show_register_page()
 
 
 for i in lights_id.items():
@@ -107,4 +162,3 @@ for i in switches_id.items():
     print(i)
 for i in motion_id.items():
     print(i)
-
