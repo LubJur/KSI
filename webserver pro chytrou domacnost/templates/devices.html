@@ -9,7 +9,7 @@
         {% for light in lights_id %}
             <tr>
                 <td>{{ light[:-5] }}</td>
-                <td>{{ lights_id[light] }}</td>
+                <td>{{ light_status.get(lights_id[light]) }}</td>
                 <!-- https://stackoverflow.com/questions/9856576/casting-ints-to-str-in-jinja2 -->
                 {% set device_url = "$.get('/" ~ lights_id[light] ~ "/info');" %}
                 <td><button onclick={{ device_url }}> Zapnout svetlo </button> </td>

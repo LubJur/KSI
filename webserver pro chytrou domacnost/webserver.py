@@ -19,9 +19,11 @@ from datetime import datetime
 import time
 
 app = Flask("webserver")
+#app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 lights_id = {"obyvakLight": 0, "koupelnaLight": 0, "kuchyneLight": 0, "karsobLight": 0, "karlikLight": 0,
              "karlosLight": 0, "juliaLight": 0}
+light_status = {}
 switches_id = {"obyvakSwitch": 0, "koupelnaSwitch": 0, "kuchyneSwitch": 0, "karsobSwitch": 0, "karlikSwitch": 0,
                "karlosSwitch": 0, "juliaSwitch": 0}
 motion_id = {"obyvakMotion": 0, "kuchyneMotion": 0}
@@ -31,6 +33,8 @@ for light in lights_id:
     get_response = requests.get("https://home_automation.iamroot.eu/newSmartLight")
     id = loads(get_response.text)["id"]
     lights_id.update({light: id})
+    light_status[lights_id[light]] = loads(get_response.text)["current_state"]
+    print(light_status)
 """
 
 for switch in switches_id:
@@ -96,13 +100,14 @@ def toggle_light(device):
     id = escape(device)
     print("som tu 1")
     get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}/toggle")
+    light_status[id] = loads(get_response.text)["current_state"]
     print("som tu 2", get_response.text)
-    return loads(get_response.text)["current_state"]
+    return render_template("devices.html", lights_id=lights_id, light_status=light_status)
 
 
 @app.route("/map")
 def devices():
-    return render_template("devices.html", lights_id=lights_id)
+    return render_template("devices.html", lights_id=lights_id, light_status=light_status)
 
 
 karsob = {"lights": lights_id, "switches": switches_id}
@@ -134,14 +139,15 @@ def handle_register(register_form):
     print(register_form["username"], register_form["password"])
     username = register_form["username"]
     password = register_form["password"]
+    # TODO: prerobit aby to odkazovalo na jednu stranku cez POST https://pythonbasics.org/flask-http-methods/
     if username == "karsob" and password == "karsob":
-        return render_template("devices.html", lights_id=karsob["lights"])
+        return render_template("devices.html", lights_id=karsob["lights"], light_status=light_status)
     elif username == "karlos" and password == "karlos":
-        return render_template("devices.html", lights_id=karlos["lights"])
+        return render_template("devices.html", lights_id=karlos["lights"], light_status=light_status)
     elif username == "julia" and password == "julia":
-        return render_template("devices.html", lights_id=julia["lights"])
+        return render_template("devices.html", lights_id=julia["lights"], light_status=light_status)
     elif username == "karlik" and password == "karlik":
-        return render_template("devices.html", lights_id=karlik["lights"])
+        return render_template("devices.html", lights_id=karlik["lights"], light_status=light_status)
     else:
         return f"""
         Invalid login 
@@ -162,3 +168,8 @@ for i in switches_id.items():
     print(i)
 for i in motion_id.items():
     print(i)
+
+if __name__ == '__main__':
+    app.jinja_env.auto_reload = True
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
+    #app.run(debug=True, host='0.0.0.0')
