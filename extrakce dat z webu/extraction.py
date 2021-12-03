@@ -69,8 +69,8 @@ def get_most_visited_webpage(base_url: str) -> Tuple[int, str]:
             #print(a["href"])
             full = node + a["href"]
             #print(full)
-            if full not in visited and a["href"][:4] != "http":
-                nodes_list.append(full)
+            if full not in visited and a["href"][:6] != "https:" and a["href"][-1] != "#" and a["href"][-1] != "/":
+                nodes_list.append(full[:-5] + "/")
     print("visited", visited)
     print("len visited", len(visited))
     """

@@ -12,7 +12,7 @@
 # TODO: formular cez ktory sa mozu spolubyvajuci prihlasit
 # TODO: zoznam s tlacidlami na ovladanie svetiel pre kazdeho spolubyvajuceho, mozu zapnut len svoje alebo spolocne
 
-from flask import Flask, request, url_for, abort, jsonify, render_template, escape
+from flask import Flask, request, url_for, abort, jsonify, render_template, escape, redirect
 import requests
 from json import loads
 from datetime import datetime
@@ -107,7 +107,16 @@ def toggle_light(device):
 
 @app.route("/map")
 def devices():
-    return render_template("devices.html", lights_id=lights_id, light_status=light_status)
+    result = request.form
+    print(result)
+    try:
+        username = result.getlist("username")[0]
+        password = result.getlist("password")[0]
+        print(username, password)
+        print(lights_id, light_status)
+        return render_template("devices.html", lights_id=lights_id, light_status=light_status)
+    except IndexError:
+        return "Invalid user"
 
 
 karsob = {"lights": lights_id, "switches": switches_id}
@@ -139,9 +148,13 @@ def handle_register(register_form):
     print(register_form["username"], register_form["password"])
     username = register_form["username"]
     password = register_form["password"]
+    data = {"username": register_form["username"], "password": register_form["password"]}
     # TODO: prerobit aby to odkazovalo na jednu stranku cez POST https://pythonbasics.org/flask-http-methods/
+    # TODO: toto ale cez cookies, nie POST  https://pythonbasics.org/flask-cookies/
     if username == "karsob" and password == "karsob":
-        return render_template("devices.html", lights_id=karsob["lights"], light_status=light_status)
+        login = requests.get("http://127.0.0.1:5000/map", data=data)
+        return redirect("/map", data=data)
+        #return render_template("devices.html", lights_id=karsob["lights"], light_status=light_status)
     elif username == "karlos" and password == "karlos":
         return render_template("devices.html", lights_id=karlos["lights"], light_status=light_status)
     elif username == "julia" and password == "julia":

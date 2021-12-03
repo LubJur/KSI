@@ -68,14 +68,8 @@ def newSwitchSensor():
     return jsonify(answer)
 """
 
-get_response = requests.get("http://localhost:5000/newSmartLight")
-print(get_response.text)
-
-get_response = requests.get("http://localhost:5000/newMotionSensor")
-print(get_response.text)
-
-get_response = requests.get("http://localhost:5000/newSwitchSensor")
-print(get_response.text)
-
+data = {"username": "Karlik", "password": "Karlikpass"}
+post_response = requests.get("http://127.0.0.1:5000/map", data=data)
+print(post_response)
 #get_response = requests.get("http://home_automation.iamroot.eu/newSwitchSensor")
 #print(get_response.text)
