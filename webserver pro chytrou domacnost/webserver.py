@@ -11,7 +11,7 @@
 # TODO: prehlad kolko percent ceny plynu by mal kto zaplatit
 # TODO: formular cez ktory sa mozu spolubyvajuci prihlasit
 # TODO: zoznam s tlacidlami na ovladanie svetiel pre kazdeho spolubyvajuceho, mozu zapnut len svoje alebo spolocne
-
+import flask
 from flask import Flask, request, url_for, abort, jsonify, render_template, escape, redirect
 import requests
 from json import loads
@@ -19,8 +19,9 @@ from datetime import datetime
 import time
 
 app = Flask("webserver")
+app.secret_key = "3FauQvwhSo4mpcc"
 #app.config["TEMPLATES_AUTO_RELOAD"] = True
-
+session = {}
 lights_id = {"obyvakLight": 0, "koupelnaLight": 0, "kuchyneLight": 0, "karsobLight": 0, "karlikLight": 0,
              "karlosLight": 0, "juliaLight": 0}
 light_status = {}
@@ -107,17 +108,14 @@ def toggle_light(device):
 
 @app.route("/map")
 def devices():
-    result = request.form
-    print(result)
-    try:
-        username = result.getlist("username")[0]
-        password = result.getlist("password")[0]
-        print(username, password)
-        print(lights_id, light_status)
-        return render_template("devices.html", lights_id=lights_id, light_status=light_status)
-    except IndexError:
-        return "Invalid user"
-
+    if "username" not in session:
+        return "You are not logged in <br><a href = '/'>" + "click here to log in</a>"
+    username = session["username"]
+    password = session["password"]
+    print(username, password)
+    lights_id = karsob["lights"]
+    #return "Logged in as " + username + '<br>' + password + "<b><a href = '/logout'>click here to log out</a></b>"
+    return render_template("devices.html", lights_id=lights_id, light_status=light_status, username=username)
 
 karsob = {"lights": lights_id, "switches": switches_id}
 karlos = {"lights": {"karlosLight": lights_id["karlosLight"], "kuchyneLight": lights_id["kuchyneLight"],
@@ -148,19 +146,15 @@ def handle_register(register_form):
     print(register_form["username"], register_form["password"])
     username = register_form["username"]
     password = register_form["password"]
-    data = {"username": register_form["username"], "password": register_form["password"]}
-    # TODO: prerobit aby to odkazovalo na jednu stranku cez POST https://pythonbasics.org/flask-http-methods/
-    # TODO: toto ale cez cookies, nie POST  https://pythonbasics.org/flask-cookies/
-    if username == "karsob" and password == "karsob":
-        login = requests.get("http://127.0.0.1:5000/map", data=data)
-        return redirect("/map", data=data)
-        #return render_template("devices.html", lights_id=karsob["lights"], light_status=light_status)
-    elif username == "karlos" and password == "karlos":
-        return render_template("devices.html", lights_id=karlos["lights"], light_status=light_status)
-    elif username == "julia" and password == "julia":
-        return render_template("devices.html", lights_id=julia["lights"], light_status=light_status)
-    elif username == "karlik" and password == "karlik":
-        return render_template("devices.html", lights_id=karlik["lights"], light_status=light_status)
+    userdata = (username, password)
+    print("userdata", userdata)
+    # https://pythonbasics.org/flask-sessions/
+    # https://stackoverflow.com/questions/41865329/flask-session-and-multiple-users
+    if userdata in (("karsob", "karsob") or ("karlos", "karlos") or ("julia", "julia") or ("karlik", "karlik")):
+        session["username"] = username
+        session["password"] = password
+        print(session)
+        return redirect("/map")
     else:
         return f"""
         Invalid login 
@@ -172,8 +166,16 @@ def register():
     if request.method == "POST":
         return handle_register(request.form)
     else:
-        return show_register_page()
+        if "username" in session:
+            return redirect(url_for("devices"))
+        else:
+            return show_register_page()
 
+@app.route("/logout")
+def logout():
+    session.pop("username", None)
+    session.pop("password", None)
+    return redirect(url_for("register"))
 
 for i in lights_id.items():
     print(i)
