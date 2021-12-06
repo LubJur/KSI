@@ -21,11 +21,11 @@ status = StringVar()
 
 hostname.set("159.89.4.84")
 port.set(42069)
-name.set("")
-password.set("")
-description.set("")
+name.set("LubJur")
+password.set("test")
+description.set("nieco")
 isNSFW.set("false")
-filename = ""
+filename = "/home/lubomir/Pictures/percenta.jpg"
 
 
 def check_data(hostname, port, name, password, description, isNSFW, meme):
@@ -65,18 +65,30 @@ def connect(hostname, port, name, password, description, isNSFW, meme):
         window.update()  # https://stackoverflow.com/questions/24167053/tkinter-label-doesnt-update
         s.connect((hostname, port))
         s.sendall(pynetstring.encode("C MTP V:1.0"))
-        data = s.recv(1024).decode()
-        if data != "11:S MTP V:1.0,":
-            status.set("ERROR: Server is not responding")
+        data = decoder.feed(s.recv(1024))
+        if data[0].decode() != "S MTP V:1.0":
+            s.sendall(pynetstring.encode("E server is not responding"))
+            status.set("E Server is not responding")
             window.update()
             send_btn["state"] = "enable"
             return
         s.sendall(pynetstring.encode(f"C {name}"))
 
-        token = s.recv(1024)
-        token = token.decode()[5:-1]
-        data_port = s.recv(1024)
-        data_port = data_port.decode()[4:-1]
+        token = decoder.feed(s.recv(1024))
+        token = token[0].decode()
+        if token == "":
+            s.sendall(pynetstring.encode("E token not received"))
+            status.set("E token not received")
+            window.update()
+            send_btn["state"] = "enable"
+        data_port = decoder.feed(s.recv(1024))
+        data_port = data_port[0].decode()
+        if data_port[0] == "E":
+            s.sendall(pynetstring.encode("E data port not received"))
+            status.set("E data port not received")
+            window.update()
+            send_btn["state"] = "enable"
+        data_port = data_port[2:]
         status.set("Sending data...")
         window.update()
 
@@ -85,8 +97,9 @@ def connect(hostname, port, name, password, description, isNSFW, meme):
             d.sendall(pynetstring.encode(f"C {name}"))
             data_sum = 0
             len_sent = 0
-            if d.recv(1024).decode()[5:-1] != token:
-                status.set("ERROR: Tokens do not match")
+            if decoder.feed(d.recv(1024))[0].decode() != token:
+                s.sendall(pynetstring.encode("E tokens do not match"))
+                status.set("E tokens do not match")
                 window.update()
                 send_btn["state"] = "enable"
                 return
@@ -132,7 +145,8 @@ def connect(hostname, port, name, password, description, isNSFW, meme):
                     break
 
                 else:
-                    status.set(f"ERROR: {request}")
+                    s.sendall(pynetstring.encode(f"E {request}"))
+                    status.set(f"E {request}")
                     window.update()
                     send_btn["state"] = "enable"
                     return
@@ -142,7 +156,8 @@ def connect(hostname, port, name, password, description, isNSFW, meme):
         msglen = msglen[0].decode()[2:]
         print("data_sent:", msglen)
         if int(msglen) != data_sum:
-            status.set("ERROR: Not all data sent")
+            s.sendall(pynetstring.encode("E not all data sent"))
+            status.set("E Not all data sent")
             window.update()
             send_btn["state"] = "enable"
             return
@@ -154,7 +169,11 @@ def connect(hostname, port, name, password, description, isNSFW, meme):
             window.update()
             print("SUCCESS")
             send_btn["state"] = "enable"
-
+        else:
+            s.sendall(pynetstring.encode("E ACK message not received"))
+            status.set("E ACK message not received")
+            window.update()
+            send_btn["state"] = "enable"
 
 
 def browseFiles():
