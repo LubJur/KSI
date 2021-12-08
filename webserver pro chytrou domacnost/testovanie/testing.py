@@ -1,5 +1,7 @@
 import requests  # python -m pip install -U requests
 from time import sleep
+from flask import Flask, render_template
+import numpy as np
 
 """@app.route("/newSmartLight")
 def newSmartLight():
@@ -66,10 +68,12 @@ def newSwitchSensor():
         "type": "SwitchSensor"
     }
     return jsonify(answer)
-"""
+
 
 data = {"username": "Karlik", "password": "Karlikpass"}
 post_response = requests.get("http://127.0.0.1:5000/map", data=data)
 print(post_response)
+"""
 #get_response = requests.get("http://home_automation.iamroot.eu/newSwitchSensor")
 #print(get_response.text)
+

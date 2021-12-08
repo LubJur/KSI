@@ -104,7 +104,12 @@ def toggle_light(device):
     light_status[id] = loads(get_response.text)["current_state"]
     print("som tu 2", get_response.text)
     return render_template("devices.html", lights_id=lights_id, light_status=light_status)
-
+"""
+@app.route("/update", methods=["GET"])
+def get_status():
+    light_status = light_status
+    return jsonify(light_status=light_status)
+"""
 
 @app.route("/map")
 def devices():
@@ -150,7 +155,7 @@ def handle_register(register_form):
     print("userdata", userdata)
     # https://pythonbasics.org/flask-sessions/
     # https://stackoverflow.com/questions/41865329/flask-session-and-multiple-users
-    if userdata in (("karsob", "karsob") or ("karlos", "karlos") or ("julia", "julia") or ("karlik", "karlik")):
+    if userdata in [("karsob", "karsob"), ("karlos", "karlos"), ("julia", "julia"), ("karlik", "karlik")]:
         session["username"] = username
         session["password"] = password
         print(session)

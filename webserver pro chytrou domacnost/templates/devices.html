@@ -1,5 +1,11 @@
 {% extends "flat_map.html" %}
 {% block devices %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+$("#devices").click(function() {
+	$("#devices").load("/" + " #devices");
+});
+</script>
     <table>
         <tr>
             <th>Room</th>
@@ -12,7 +18,7 @@
                 <td>{{ light_status.get(lights_id[light]) }}</td>
                 <!-- https://stackoverflow.com/questions/9856576/casting-ints-to-str-in-jinja2 -->
                 {% set device_url = "$.get('/" ~ lights_id[light] ~ "/info');" %}
-                <td><button onclick={{ device_url }}> Zapnout svetlo </button> </td>
+                <td><button onclick={{ device_url }} > Zapnout svetlo </button> </td>
             </tr>
         {% endfor %}
     </table>

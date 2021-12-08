@@ -21,11 +21,11 @@ status = StringVar()
 
 hostname.set("159.89.4.84")
 port.set(42069)
-name.set("LubJur")
-password.set("test")
-description.set("nieco")
+name.set("")
+password.set("")
+description.set("")
 isNSFW.set("false")
-filename = "/home/lubomir/Pictures/percenta.jpg"
+filename = ""
 
 
 def check_data(hostname, port, name, password, description, isNSFW, meme):

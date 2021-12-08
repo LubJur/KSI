@@ -3,9 +3,10 @@ import requests
 from json import loads
 from datetime import datetime
 import time
+import numpy as np
 
 app = Flask("webserver_test")
-app.secret_key = "dasdasdasdasd"
+#app.secret_key = "dasdasdasdasd"
 
 """
 @app.route("/post", methods=["POST", "GET"])
@@ -24,7 +25,7 @@ def funk():
         return result
     elif request.method == "POST":
         pass
-"""
+
 session = {}
 
 @app.route("/")
@@ -57,3 +58,16 @@ def login():
 def logout():
     session.pop("username", None)
     return redirect(url_for("index"))
+"""
+
+random_decimal = np.random.rand()
+
+
+@app.route("/update_decimal", methods=["POST"])
+def updatedecimal():
+    random_decimal = np.random.rand()
+    return jsonify("", render_template("ajax_test2.html", x=random_decimal))
+
+@app.route("/")
+def homepage():
+    return render_template("ajax_test.html", x=random_decimal)
