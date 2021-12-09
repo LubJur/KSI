@@ -17,10 +17,11 @@ import requests
 from json import loads
 from datetime import datetime
 import time
+from suntime import Sun
 
 app = Flask("webserver")
 app.secret_key = "3FauQvwhSo4mpcc"
-#app.config["TEMPLATES_AUTO_RELOAD"] = True
+
 session = {}
 lights_id = {"obyvakLight": 0, "koupelnaLight": 0, "kuchyneLight": 0, "karsobLight": 0, "karlikLight": 0,
              "karlosLight": 0, "juliaLight": 0}
@@ -56,9 +57,12 @@ for motion in motion_id:
 # zmena farby svetla podla casu
 @app.route("/cron")
 def change_color():
+    # https://pypi.org/project/suntime/
     print(datetime.now().time())  # https://www.programiz.com/python-programming/datetime/current-time
-    sunset = 17
-    sunrise = 6
+    sun = Sun(48.749167, 21.901389)
+    sunset = sun.get_sunset_time()
+    sunrise = sun.get_sunrise_time()
+    print()
     proportion_color = 4200
     now_time = str(datetime.now().time())
     now_time = int(now_time[:2]) * 60 + int(now_time[3:5])
@@ -99,11 +103,8 @@ def change_color():
 @app.route("/<device>/info")
 def toggle_light(device):
     id = escape(device)
-    print("som v toggle_light")
     get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}/toggle")
-    print(loads(get_response.text))
     light_status[id] = loads(get_response.text)["current_state"]
-    print(light_status[id])
     return render_template("devices.html", lights_id=lights_id, light_status=light_status)
 
 @app.route("/update_status", methods=["POST"])
@@ -132,9 +133,7 @@ def devices():
         return "You are not logged in <br><a href = '/'>" + "click here to log in</a>"
     username = session["username"]
     password = session["password"]
-    print(username, password)
     lights_id = karsob["lights"]
-    #return "Logged in as " + username + '<br>' + password + "<b><a href = '/logout'>click here to log out</a></b>"
     return render_template("devices.html", lights_id=lights_id, light_status=light_status, username=username)
 
 karsob = {"lights": lights_id, "switches": switches_id}
@@ -167,13 +166,11 @@ def handle_register(register_form):
     username = register_form["username"]
     password = register_form["password"]
     userdata = (username, password)
-    print("userdata", userdata)
     # https://pythonbasics.org/flask-sessions/
     # https://stackoverflow.com/questions/41865329/flask-session-and-multiple-users
     if userdata in [("karsob", "karsob"), ("karlos", "karlos"), ("julia", "julia"), ("karlik", "karlik")]:
         session["username"] = username
         session["password"] = password
-        print(session)
         return redirect("/map")
     else:
         return f"""

@@ -96,17 +96,23 @@ $(document).ready(function() {
     });
 });
 </script>
+    $(document).ready(function(){
+			$("#devices").mouseup(function()
+			{
+				$( "#devices" ).load(window.location.href + " #devices" ).delay(1000);
+			});
+    });
+
 -->
 <script>
-<!-- I have spent too much time trying to do it when a button is pressed so here it is on a timer -->
-    $(document).ready(function(){
-		setInterval(function()
+<!-- I have spent too much time trying to do it when a button is pressed so here it is on a timer instead
+https://stackoverflow.com/questions/33801650/how-do-i-refresh-a-div-content -->
+setInterval(function()
 		{
 			$( "#devices" ).load(window.location.href + " #devices" );
 		}, 1000);
-    });
-
 </script>
+
 Logged in as {{ username }} <br>
 <a href = "/logout">Log out</a>
 
