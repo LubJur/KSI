@@ -99,20 +99,35 @@ def change_color():
 @app.route("/<device>/info")
 def toggle_light(device):
     id = escape(device)
-    print("som tu 1")
+    print("som v toggle_light")
     get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}/toggle")
+    print(loads(get_response.text))
     light_status[id] = loads(get_response.text)["current_state"]
-    print("som tu 2", get_response.text)
+    print(light_status[id])
     return render_template("devices.html", lights_id=lights_id, light_status=light_status)
+
+@app.route("/update_status", methods=["POST"])
+def update_status():
+    print(light_status)
+    print(light_status.get(lights_id[light]))
+    return jsonify({"result": light_status.get(lights_id[light])})
+
 """
 @app.route("/update", methods=["GET"])
 def get_status():
     light_status = light_status
     return jsonify(light_status=light_status)
+    
+                var update = function(){
+                    $.get(&#39;/23da16b1-7444-40a0-8a66-a833b7019408/info&#39;); 
+                    $('#devices').load('/map' + ' #devices');
+                });
+            
 """
 
 @app.route("/map")
 def devices():
+    print("som v devices")
     if "username" not in session:
         return "You are not logged in <br><a href = '/'>" + "click here to log in</a>"
     username = session["username"]
