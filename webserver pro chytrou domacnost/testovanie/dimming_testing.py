@@ -26,7 +26,7 @@ for light in lights_id:
 """
 # zmena farby svetla podla casu
 @app.route("/cron")
-def change_color():
+def change_color(now_time):
     # https://pypi.org/project/suntime/
     change_needed = False
     sun = Sun(48.749167, 21.901389)
@@ -34,8 +34,8 @@ def change_color():
     sunset = int(sunset.strftime("%H")) * 60 + int(sunset.strftime("%M"))
     sunrise = sun.get_sunrise_time()
     sunrise = int(sunrise.strftime("%H")) * 60 + int(sunrise.strftime("%M"))
-    now_time = datetime.now().time()  # https://www.programiz.com/python-programming/datetime/current-time
-    now_time = int(now_time.strftime("%H")) * 60 + int(now_time.strftime("%M")) # hours * 60 + minutes so we can only work in minutes
+    #now_time = datetime.now().time()  # https://www.programiz.com/python-programming/datetime/current-time
+    #now_time = int(now_time.strftime("%H")) * 60 + int(now_time.strftime("%M")) # hours * 60 + minutes so we can only work in minutes
 
     if sunset + 90 >= now_time >= sunset:  # when now_time is after sunset  6500 -> 2300
         change_needed = True
@@ -48,8 +48,12 @@ def change_color():
         color = (now_time - (sunrise - 90)) * (4200/90) + 2300
 
     if change_needed:
+        color = round(color)
         for light in lights_id:
             id = lights_id[light]
             time.sleep(0.2)
             get_response = requests.get(
                 f"https://home_automation.iamroot.eu/device/{id}/color_temperature/{color}")
+
+for i in range(284, 374, 1):
+    change_color(i)

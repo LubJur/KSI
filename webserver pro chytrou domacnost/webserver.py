@@ -64,7 +64,8 @@ def change_color():
     sunrise = sun.get_sunrise_time()
     sunrise = int(sunrise.strftime("%H")) * 60 + int(sunrise.strftime("%M"))
     now_time = datetime.now().time()  # https://www.programiz.com/python-programming/datetime/current-time
-    now_time = int(now_time.strftime("%H")) * 60 + int(now_time.strftime("%M")) # hours * 60 + minutes so we can only work in minutes
+    # hours * 60 + minutes, so we only work in minutes
+    now_time = int(now_time.strftime("%H")) * 60 + int(now_time.strftime("%M"))
 
     if sunset + 90 >= now_time >= sunset:  # when now_time is after sunset  6500 -> 2300
         change_needed = True
@@ -77,6 +78,7 @@ def change_color():
         color = (now_time - (sunrise - 90)) * (4200/90) + 2300
 
     if change_needed:
+        color = round(color)
         for light in lights_id:
             id = lights_id[light]
             time.sleep(0.2)
@@ -110,6 +112,29 @@ def get_status():
                 });
             
 """
+@app.route("/junction")
+def junction():
+    if "username" not in session:
+        return "You are not logged in <br><a href = '/'>" + "click here to log in</a>"
+    username = session["username"]
+    return """
+    Logged in as {{ username }} <br>
+    <a href = "/logout">Log out</a>
+    <br>
+    <a href = "/map"> Map </a>
+    <a href = "/devices"> Devices </a>
+    <a href = "/gas"> Gas payment </a>
+    <a href = "/controls"> Controls </a>
+    """
+
+@app.route("/controls")
+def controls():
+    if "username" not in session:
+        return "You are not logged in <br><a href = '/'>" + "click here to log in</a>"
+    username = session["username"]
+    if username is "karsob":
+        lights_id = karsob["lights"]
+        return render_template("devices.html", lights_id=lights_id)
 
 @app.route("/map")
 def devices():
@@ -121,6 +146,7 @@ def devices():
     lights_id = karsob["lights"]
     return render_template("devices.html", lights_id=lights_id, light_status=light_status, username=username)
 
+# TODO: vlastne staci mat len jedno custom svetlo a id spolocnych tam dat cez inu premennu
 karsob = {"lights": lights_id, "switches": switches_id}
 karlos = {"lights": {"karlosLight": lights_id["karlosLight"], "kuchyneLight": lights_id["kuchyneLight"],
                      "obyvakLight": lights_id["obyvakLight"]},
