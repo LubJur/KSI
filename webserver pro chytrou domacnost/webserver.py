@@ -11,7 +11,6 @@
 # TODO: prehlad kolko percent ceny plynu by mal kto zaplatit
 # TODO: formular cez ktory sa mozu spolubyvajuci prihlasit
 # TODO: zoznam s tlacidlami na ovladanie svetiel pre kazdeho spolubyvajuceho, mozu zapnut len svoje alebo spolocne
-import flask
 from flask import Flask, request, url_for, abort, jsonify, render_template, escape, redirect
 import requests
 from json import loads
@@ -58,46 +57,32 @@ for motion in motion_id:
 @app.route("/cron")
 def change_color():
     # https://pypi.org/project/suntime/
-    print(datetime.now().time())  # https://www.programiz.com/python-programming/datetime/current-time
+    change_needed = False
     sun = Sun(48.749167, 21.901389)
     sunset = sun.get_sunset_time()
+    sunset = int(sunset.strftime("%H")) * 60 + int(sunset.strftime("%M"))
     sunrise = sun.get_sunrise_time()
-    print()
-    proportion_color = 4200
-    now_time = str(datetime.now().time())
-    now_time = int(now_time[:2]) * 60 + int(now_time[3:5])
-    print(now_time)
-    if sunset * 60 + 90 > now_time > sunset * 60:  # 17:00
-        time_before = now_time
-        while now_time < sunset * 60 + 90:  # 18:30
-            now_time = str(datetime.now().time())
-            now_time = int(now_time[:2]) * 60 + int(now_time[3:5])
-            if time_before + 5 < now_time:
-                time_before = now_time
-                proportion_color -= 235
-                for light in lights_id:
-                    id = lights_id[light]
-                    time.sleep(0.2)
-                    print("idem poslat request")
-                    get_response = requests.get(
-                        f"https://home_automation.iamroot.eu/device/{id}/color_temperature/{2300 + proportion_color}")
-                    print(loads(get_response.text))
+    sunrise = int(sunrise.strftime("%H")) * 60 + int(sunrise.strftime("%M"))
+    now_time = datetime.now().time()  # https://www.programiz.com/python-programming/datetime/current-time
+    now_time = int(now_time.strftime("%H")) * 60 + int(now_time.strftime("%M")) # hours * 60 + minutes so we can only work in minutes
 
-    elif sunrise * 60 + 90 > now_time > sunrise * 60:  # 6:00
-        time_before = now_time
-        while now_time < sunrise * 60 + 90:  # 7:30
-            now_time = str(datetime.now().time())
-            now_time = int(now_time[:2]) * 60 + int(now_time[3:5])
-            if time_before + 5 < now_time:
-                time_before = now_time
-                proportion_color += 235
-                for light in lights_id:
-                    id = lights_id[light]
-                    time.sleep(0.2)
-                    print("idem poslat request")
-                    get_response = requests.get(
-                        f"https://home_automation.iamroot.eu/device/{id}/color_temperature/{2300 + proportion_color}")
-                    print(loads(get_response.text))
+    if sunset + 90 >= now_time >= sunset:  # when now_time is after sunset  6500 -> 2300
+        change_needed = True
+        # starting_color - ((now_time - sunset) * change_in_minute)
+        color = 6500 - ((now_time - sunset) * (4200/90))
+
+    elif sunrise >= now_time >= sunrise - 90:
+        change_needed = True
+        # (now_time - (sunrise - 90 min)) * change_in_minute + starting_color
+        color = (now_time - (sunrise - 90)) * (4200/90) + 2300
+
+    if change_needed:
+        for light in lights_id:
+            id = lights_id[light]
+            time.sleep(0.2)
+            get_response = requests.get(
+                f"https://home_automation.iamroot.eu/device/{id}/color_temperature/{color}")
+            print(get_response.text)
 
 
 @app.route("/<device>/info")
