@@ -46,7 +46,6 @@ for light in lights_id:
     #light_status[lights_id[light]] = [loads(get_response.text)["current_state"],
     #                                  loads(get_response.text)["color_temperature"]]
     #print(light_status)
-"""
 
 for switch in switches_id:
     print(switch)
@@ -60,7 +59,6 @@ for motion in motion_id:
     id = loads(get_response.text)["id"]
     motion_id.update({motion: id})
 
-"""
 
 
 # zmena farby svetla podla casu
@@ -97,12 +95,23 @@ def change_color():
             print(get_response.text)
 
 
-@app.route("/<device>/info")
+@app.route("/<device>/toggle")
 def toggle_light(device):
     id = escape(device)
     get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}/toggle")
     light_status[id] = loads(get_response.text)["current_state"]
-    return render_template("devices.html", lights_id=lights_id, light_status=light_status)
+    return f"Status changed on light with id {id}"
+
+
+@app.route("/<device>/info")
+def device_info(device):
+    id = escape(device)
+    get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}")
+    info = loads(get_response.text)
+    actions = info["actions"]
+    print(info, actions)
+    return render_template("device_info.html", info=info, actions=actions)
+
 
 @app.route("/update_status", methods=["POST"])
 def update_status():
@@ -131,20 +140,11 @@ def junction():
     Logged in as { username } <br>
     <a href = "/logout">Log out</a>
     <br>
-    <a href = "/map"> Map </a>
-    <a href = "/devices"> Devices </a>
+    <a href = "/map"> Map </a> <br>
+    <a href = "/controls"> Controls </a> <br>
+    <a href = "/devices"> Devices </a> <br>
     <a href = "/gas"> Gas payment </a>
-    <a href = "/controls"> Controls </a>
     """
-
-@app.route("/controls")
-def controls():
-    if "username" not in session:
-        return "You are not logged in <br><a href = '/'>" + "click here to log in</a>"
-    username = session["username"]
-    if username is "karsob":
-        lights_id = karsob["lights"]
-        return render_template("devices.html", lights_id=lights_id)
 
 
 @app.route("/map")
@@ -157,6 +157,33 @@ def map():
         get_response = requests.get(f"https://home_automation.iamroot.eu/device/{lights_id[light]}")
         light_status[light] = [loads(get_response.text)["current_state"], loads(get_response.text)["color_temperature"]]
     return render_template("map.html", light_status=light_status, username=username)
+
+
+@app.route("/controls")
+def controls():
+    if "username" not in session:
+        return "You are not logged in <br><a href = '/'>" + "click here to log in</a>"
+    username = session["username"]
+    personal = ""
+    obyvak = lights_id["obyvakLight"]
+    kuchyne = lights_id["kuchyneLight"]
+    if username == "karsob":
+        personal = lights_id["karsobLight"]
+    elif username == "karlos":
+        personal = lights_id["karlosLight"]
+    elif username == "julia":
+        personal = lights_id["juliaLight"]
+    elif username == "karlik":
+        personal = lights_id["karlikLight"]
+    return render_template("controls.html", personal=personal, obyvak=obyvak, kuchyne=kuchyne, username=username)
+
+
+@app.route("/devices")
+def devices():
+    if "username" not in session:
+        return "You are not logged in <br><a href = '/'>" + "click here to log in</a>"
+    username = session["username"]
+    return render_template("devices2.html", lights_id=lights_id, motion_id=motion_id, switches_id=switches_id)
 
 
 # TODO: vlastne staci mat len jedno custom svetlo a id spolocnych tam dat cez inu premennu
