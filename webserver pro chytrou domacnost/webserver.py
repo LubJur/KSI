@@ -1,17 +1,8 @@
 # TODO: Automatizacia
 # TODO: automaticke zapinanie svetla kuchyne a chodby podla senzora pohybu
-# TODO: Pri zapade slnka 6500K -> 2300K, pri vychode naopak, 47K za minutu pocas pol hodiny https://michelanders.blogspot.com/2010/12/calulating-sunrise-and-sunset-in-python.html
 # TODO: Ovladanie svetiel pomocou smart vypinacou priamo, bez servera
-# TODO: Vzdialene vypinanie svetiel v miestnosti (nie ale v rozdielnych izbach)
-# TODO: rozdelenie ceny za plyn podla toho ako dlho v ich izbe svietilo svetlo
 
-# TODO: Webstranky
-# TODO: mapa bytu s informaciami ake svetla su zasvietene a aku maju farbu
-# TODO: Tabulka s odkazmi na zariadenia, v ktorej miestnosti su (odkaz ide cez server)
-# TODO: prehlad kolko percent ceny plynu by mal kto zaplatit
-# TODO: formular cez ktory sa mozu spolubyvajuci prihlasit
-# TODO: zoznam s tlacidlami na ovladanie svetiel pre kazdeho spolubyvajuceho, mozu zapnut len svoje alebo spolocne
-from flask import Flask, request, url_for, abort, jsonify, render_template, escape, redirect
+from flask import Flask, request, url_for, render_template, escape, redirect
 import requests
 from json import loads
 from datetime import datetime
@@ -22,18 +13,8 @@ app = Flask("webserver")
 app.secret_key = "3FauQvwhSo4mpcc"
 session = {}
 
-class Light:
-    def __init__(self, uuid, color, state, room, power):
-        self.uuid = uuid
-        self.color = color
-        self.state = state
-        self.room = room
-        self.power = power
-
-
 lights_id = {"obyvakLight": 0, "koupelnaLight": 0, "kuchyneLight": 0, "karsobLight": 0, "karlikLight": 0,
              "karlosLight": 0, "juliaLight": 0}
-light_status = {}
 switches_id = {"obyvakSwitch": 0, "koupelnaSwitch": 0, "kuchyneSwitch": 0, "karsobSwitch": 0, "karlikSwitch": 0,
                "karlosSwitch": 0, "juliaSwitch": 0}
 motion_id = {"obyvakMotion": 0, "kuchyneMotion": 0}
@@ -43,9 +24,6 @@ for light in lights_id:
     get_response = requests.get("https://home_automation.iamroot.eu/newSmartLight")
     id = loads(get_response.text)["id"]
     lights_id.update({light: id})
-    #light_status[lights_id[light]] = [loads(get_response.text)["current_state"],
-    #                                  loads(get_response.text)["color_temperature"]]
-    #print(light_status)
 
 for switch in switches_id:
     print(switch)
@@ -60,8 +38,6 @@ for motion in motion_id:
     motion_id.update({motion: id})
 
 
-
-# zmena farby svetla podla casu
 @app.route("/cron")
 def change_color():
     # https://pypi.org/project/suntime/
@@ -99,7 +75,6 @@ def change_color():
 def toggle_light(device):
     id = escape(device)
     get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}/toggle")
-    light_status[id] = loads(get_response.text)["current_state"]
     return f"Status changed on light with id {id}"
 
 
@@ -109,28 +84,9 @@ def device_info(device):
     get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}")
     info = loads(get_response.text)
     actions = info["actions"]
-    print(info, actions)
     return render_template("device_info.html", info=info, actions=actions)
 
 
-@app.route("/update_status", methods=["POST"])
-def update_status():
-    print(light_status)
-    print(light_status.get(lights_id[light]))
-    return jsonify({"result": light_status.get(lights_id[light])})
-
-"""
-@app.route("/update", methods=["GET"])
-def get_status():
-    light_status = light_status
-    return jsonify(light_status=light_status)
-    
-                var update = function(){
-                    $.get(&#39;/23da16b1-7444-40a0-8a66-a833b7019408/info&#39;); 
-                    $('#devices').load('/map' + ' #devices');
-                });
-            
-"""
 @app.route("/junction")
 def junction():
     if "username" not in session:
@@ -143,7 +99,7 @@ def junction():
     <a href = "/map"> Map </a> <br>
     <a href = "/controls"> Controls </a> <br>
     <a href = "/devices"> Devices </a> <br>
-    <a href = "/gas"> Gas payment </a>
+    <a href = "/heating"> Heating payment </a>
     """
 
 
@@ -183,23 +139,31 @@ def devices():
     if "username" not in session:
         return "You are not logged in <br><a href = '/'>" + "click here to log in</a>"
     username = session["username"]
-    return render_template("devices2.html", lights_id=lights_id, motion_id=motion_id, switches_id=switches_id)
+    return render_template("devices.html", lights_id=lights_id, motion_id=motion_id, switches_id=switches_id)
 
-
-# TODO: vlastne staci mat len jedno custom svetlo a id spolocnych tam dat cez inu premennu
-karsob = {"lights": lights_id, "switches": switches_id}
-karlos = {"lights": {"karlosLight": lights_id["karlosLight"], "kuchyneLight": lights_id["kuchyneLight"],
-                     "obyvakLight": lights_id["obyvakLight"]},
-          "switches": {"karlosSwitch": switches_id["karlosSwitch"], "kuchyneSwitch": switches_id["kuchyneSwitch"],
-                       "obyvakSwitch": switches_id["obyvakSwitch"]}}
-julia = {"lights": {"juliaLight": lights_id["juliaLight"], "kuchyneLight": lights_id["kuchyneLight"],
-                    "obyvakLight": lights_id["obyvakLight"]},
-         "switches": {"juliaSwitch": switches_id["juliaSwitch"], "kuchyneSwitch": switches_id["kuchyneSwitch"],
-                      "obyvakSwitch": switches_id["obyvakSwitch"]}}
-karlik = {"lights": {"karlikLight": lights_id["karlikLight"], "kuchyneLight": lights_id["kuchyneLight"],
-                     "obyvakLight": lights_id["obyvakLight"]},
-          "switches": {"karlikSwitch": switches_id["karlikSwitch"], "kuchyneSwitch": switches_id["kuchyneSwitch"],
-                       "obyvakSwitch": switches_id["obyvakSwitch"]}}
+@app.route("/heating")
+def heating():
+    if "username" not in session:
+        return "You are not logged in <br><a href = '/'>" + "click here to log in</a>"
+    username = session["username"]
+    karsob = requests.get(f"https://home_automation.iamroot.eu/device/{lights_id['karsobLight']}")
+    karlos = requests.get(f"https://home_automation.iamroot.eu/device/{lights_id['karlosLight']}")
+    julia = requests.get(f"https://home_automation.iamroot.eu/device/{lights_id['juliaLight']}")
+    karlik = requests.get(f"https://home_automation.iamroot.eu/device/{lights_id['karlikLight']}")
+    karsob = loads(karsob.text)["power_usage"]
+    karlos = loads(karlos.text)["power_usage"]
+    julia = loads(julia.text)["power_usage"]
+    karlik = loads(karlik.text)["power_usage"]
+    try:
+        full = karsob + karlos + julia + karlik
+        karsob = (karsob / full) * 100
+        karlos = (karlos / full) * 100
+        julia = (julia / full) * 100
+        karlik = (karlik / full) * 100
+        return render_template("heating.html", full=full, karsob=round(karsob, 2), karlos=round(karlos, 2),
+                               julia=round(julia, 2), karlik=round(karlik, 2), username=username)
+    except ZeroDivisionError:
+        return "No one has used heating yet"
 
 
 def show_register_page() -> str:
@@ -239,20 +203,14 @@ def register():
         else:
             return show_register_page()
 
+
 @app.route("/logout")
 def logout():
     session.pop("username", None)
     session.pop("password", None)
     return redirect(url_for("register"))
 
-for i in lights_id.items():
-    print(i)
-for i in switches_id.items():
-    print(i)
-for i in motion_id.items():
-    print(i)
 
 if __name__ == '__main__':
     app.jinja_env.auto_reload = True
     app.config['TEMPLATES_AUTO_RELOAD'] = True
-    #app.run(debug=True, host='0.0.0.0')
