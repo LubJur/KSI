@@ -20,8 +20,17 @@ from suntime import Sun
 
 app = Flask("webserver")
 app.secret_key = "3FauQvwhSo4mpcc"
-
 session = {}
+
+class Light:
+    def __init__(self, uuid, color, state, room, power):
+        self.uuid = uuid
+        self.color = color
+        self.state = state
+        self.room = room
+        self.power = power
+
+
 lights_id = {"obyvakLight": 0, "koupelnaLight": 0, "kuchyneLight": 0, "karsobLight": 0, "karlikLight": 0,
              "karlosLight": 0, "juliaLight": 0}
 light_status = {}
@@ -34,8 +43,9 @@ for light in lights_id:
     get_response = requests.get("https://home_automation.iamroot.eu/newSmartLight")
     id = loads(get_response.text)["id"]
     lights_id.update({light: id})
-    light_status[lights_id[light]] = loads(get_response.text)["current_state"]
-    print(light_status)
+    #light_status[lights_id[light]] = [loads(get_response.text)["current_state"],
+    #                                  loads(get_response.text)["color_temperature"]]
+    #print(light_status)
 """
 
 for switch in switches_id:
@@ -117,8 +127,8 @@ def junction():
     if "username" not in session:
         return "You are not logged in <br><a href = '/'>" + "click here to log in</a>"
     username = session["username"]
-    return """
-    Logged in as {{ username }} <br>
+    return f"""
+    Logged in as { username } <br>
     <a href = "/logout">Log out</a>
     <br>
     <a href = "/map"> Map </a>
@@ -136,15 +146,18 @@ def controls():
         lights_id = karsob["lights"]
         return render_template("devices.html", lights_id=lights_id)
 
+
 @app.route("/map")
-def devices():
-    print("som v devices")
+def map():
     if "username" not in session:
         return "You are not logged in <br><a href = '/'>" + "click here to log in</a>"
     username = session["username"]
-    password = session["password"]
-    lights_id = karsob["lights"]
-    return render_template("devices.html", lights_id=lights_id, light_status=light_status, username=username)
+    light_status = {}
+    for light in lights_id:
+        get_response = requests.get(f"https://home_automation.iamroot.eu/device/{lights_id[light]}")
+        light_status[light] = [loads(get_response.text)["current_state"], loads(get_response.text)["color_temperature"]]
+    return render_template("map.html", light_status=light_status, username=username)
+
 
 # TODO: vlastne staci mat len jedno custom svetlo a id spolocnych tam dat cez inu premennu
 karsob = {"lights": lights_id, "switches": switches_id}
@@ -182,7 +195,7 @@ def handle_register(register_form):
     if userdata in [("karsob", "karsob"), ("karlos", "karlos"), ("julia", "julia"), ("karlik", "karlik")]:
         session["username"] = username
         session["password"] = password
-        return redirect("/map")
+        return redirect("/junction")
     else:
         return f"""
         Invalid login 
