@@ -1,7 +1,3 @@
-# TODO: Automatizacia
-# TODO: automaticke zapinanie svetla kuchyne a chodby podla senzora pohybu
-# TODO: Ovladanie svetiel pomocou smart vypinacou priamo, bez servera
-
 from flask import Flask, request, url_for, render_template, escape, redirect
 import requests
 from json import loads
@@ -22,21 +18,28 @@ motion_id = {"obyvakMotion": 0, "kuchyneMotion": 0}
 for light in lights_id:
     print(light)
     get_response = requests.get("https://home_automation.iamroot.eu/newSmartLight")
-    id = loads(get_response.text)["id"]
-    lights_id.update({light: id})
+    uuid = loads(get_response.text)["id"]
+    lights_id.update({light: uuid})
 
 for switch in switches_id:
     print(switch)
     get_response = requests.get("https://home_automation.iamroot.eu/newSwitchSensor")
-    id = loads(get_response.text)["id"]
-    switches_id.update({switch: id})
+    uuid = loads(get_response.text)["id"]
+    switches_id.update({switch: uuid})
+    light = switch[:-6]+"Light"
+    print(lights_id[light])
+    url_change = requests.get(f"http://home_automation.iamroot.eu/device/{uuid}/report_url?url="
+                              f"http://home_automation.iamroot.eu/device/{lights_id[light]}/toggle")
 
 for motion in motion_id:
     print(motion)
     get_response = requests.get("https://home_automation.iamroot.eu/newMotionSensor")
-    id = loads(get_response.text)["id"]
-    motion_id.update({motion: id})
-
+    uuid = loads(get_response.text)["id"]
+    motion_id.update({motion: uuid})
+    light = motion[:-6]+"Light"
+    print(lights_id[light])
+    url_change = requests.get(f"http://home_automation.iamroot.eu/device/{uuid}/report_url?url="
+                              f"http://home_automation.iamroot.eu/device/{lights_id[light]}/state/on")
 
 @app.route("/cron")
 def change_color():
@@ -74,8 +77,13 @@ def change_color():
 @app.route("/<device>/toggle")
 def toggle_light(device):
     id = escape(device)
+    print(id)
     get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}/toggle")
-    return f"Status changed on light with id {id}"
+    print(get_response)
+    return f"""
+        Status changed on light with id {id}. <br>
+        {loads(get_response.text)}
+        """
 
 
 @app.route("/<device>/info")
@@ -87,7 +95,7 @@ def device_info(device):
     return render_template("device_info.html", info=info, actions=actions)
 
 
-@app.route("/junction")
+@app.route("/menu")
 def junction():
     if "username" not in session:
         return "You are not logged in <br><a href = '/'>" + "click here to log in</a>"
@@ -186,7 +194,7 @@ def handle_register(register_form):
     if userdata in [("karsob", "karsob"), ("karlos", "karlos"), ("julia", "julia"), ("karlik", "karlik")]:
         session["username"] = username
         session["password"] = password
-        return redirect("/junction")
+        return redirect("/menu")
     else:
         return f"""
         Invalid login 
