@@ -53,6 +53,7 @@ def get_most_visited_webpage(base_url: str) -> Tuple[int, str]:
     """
     # Tuto funkci implementuj
     # https://medium.com/analytics-vidhya/apply-depth-first-search-on-web-scraping-770ba20ba33f
+    # na kazdu zo stranok by sme mohli dat request ci je aktivna a ak dostanem namiesto 200 spat kod pre cajovu kanvicu
     root = "https://python.iamroot.eu/"
     nodes_list = deque() # stack
     visited = set() # set

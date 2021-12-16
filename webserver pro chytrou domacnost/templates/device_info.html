@@ -1,7 +1,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <head>
     <style type="text/css">
-        <!-- https://www.w3schools.com/Css/css_table.asp -->
         table, td, th {
             border: 1px solid black;
         }
@@ -12,27 +11,40 @@
 </head>
 
 <body>
-    Logged in as {{ username }} <br>
-    <a href = "/logout">Log out</a>
+    <div id="user">
+        Logged in as {{ username }} <br>
+        <a href = "/logout">Log out</a> <br>
+    </div>
     <table>
         <tr>
             <th>Attribute</th>
             <th>Value</th>
-        </tr>
-        {% for stat in info %}
-            <tr>
-                {% if stat == "actions" %}
-                    {% for action in actions %}
-                    <tr>
-                        <td>{{ action }}</td>
-                        <td>{{ actions[action] }}</td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <td>{{ stat }}</td>
-                    <td>{{ info[stat] }}</td>
-                {% endif %}
+        {% if safe %}
             </tr>
-        {% endfor %}
+            {% for stat in info %}
+                <tr>
+                    {% if stat == "actions" %}
+                        {% for action in actions %}
+                        <tr>
+                            <td>{{ action }}</td>
+                            <td>{{ actions[action] }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <td>{{ stat }}</td>
+                        <td>{{ info[stat] }}</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        {% else %}
+            {% for stat in info %}
+                <tr>
+                    {% if stat not in ["id", "actions", "collector_url"] %}
+                        <td>{{ stat }}</td>
+                        <td>{{ info[stat] }}</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        {% endif %}
     </table>
 </body>

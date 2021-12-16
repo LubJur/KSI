@@ -7,37 +7,26 @@
         table {
             border-collapse: collapse;
         }
-        #user {
-
-        }
     </style>
 </head>
+
 <body>
     <div id="user">
         Logged in as {{ username }} <br>
         <a href = "/logout">Log out</a> <br>
     </div>
-    <h2>Heating payment</h2>
     <table>
         <tr>
-            <th>Roommate</th>
-            <th>Percentage</th>
+            <th>Attribute</th>
+            <th>Value</th>
         </tr>
-        <tr>
-            <th>Karsob</th>
-            <th>{{ karsob }}%</th>
-        </tr>
-        <tr>
-            <th>Karlos</th>
-            <th>{{ karlos }}%</th>
-        </tr>
-        <tr>
-            <th>Julia</th>
-            <th>{{ julia }}%</th>
-        </tr>
-        <tr>
-            <th>Karlik</th>
-            <th>{{ karlik }}%</th>
-        </tr>
+        {% for stat in info %}
+            <tr>
+                {% if stat != "id" %}
+                    <td>{{ stat }}</td>
+                    <td>{{ info[stat] }}</td>
+                {% endif %}
+            </tr>
+        {% endfor %}
     </table>
 </body>

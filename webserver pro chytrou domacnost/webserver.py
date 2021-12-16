@@ -6,15 +6,28 @@ import time
 from suntime import Sun
 
 app = Flask("webserver")
-app.secret_key = "3FauQvwhSo4mpcc"
+app.secret_key = "3z5FrwH6ABhOGpf13H7JPw"
 session = {}
 
-lights_id = {"obyvakLight": 0, "koupelnaLight": 0, "kuchyneLight": 0, "karsobLight": 0, "karlikLight": 0,
-             "karlosLight": 0, "juliaLight": 0}
-switches_id = {"obyvakSwitch": 0, "koupelnaSwitch": 0, "kuchyneSwitch": 0, "karsobSwitch": 0, "karlikSwitch": 0,
-               "karlosSwitch": 0, "juliaSwitch": 0}
-motion_id = {"obyvakMotion": 0, "kuchyneMotion": 0}
+lights_id = {'obyvakLight': 'eae0a655-12d9-4cd0-a7c7-1001880bdd73',
+             'koupelnaLight': '14c714ea-64f0-4cc5-b4aa-c9ce848cfeac',
+             'kuchyneLight': '29a8de2c-4ed1-4253-bd1e-f4711a547a19',
+             'karsobLight': '13d58f59-9cc6-4d19-aeca-9ec0a17709cd',
+             'karlikLight': '29e5a9c3-d524-4ea8-9544-e27c6f2cf1e6',
+             'karlosLight': '97febd6f-c437-46e8-a6a5-eff0752ba207',
+             'juliaLight': '89a47532-edc5-415b-b3e9-825d7db411f8'}
+switches_id = {'obyvakSwitch': '1b8ec9ae-918f-4e8e-a3d8-687b69ebcfad',
+               'koupelnaSwitch': '92e0456f-296c-47d8-beec-2b105d8702ad',
+               'kuchyneSwitch': '2a9bcb4e-b31d-467d-a752-2b525dc4e6ab',
+               'karsobSwitch': '8fcb4b3c-9919-4690-82a0-1d546863f39e',
+               'karlikSwitch': '886b075f-e3f0-49d1-a36a-9ed9ccce5496',
+               'karlosSwitch': '12d42109-1e41-4095-84c3-a18dcae85fb7',
+               'juliaSwitch': '9e4ab651-ba30-4261-a6c1-aa1bf1513eb2'}
+motion_id = {'obyvakMotion': '759f3d8a-d515-4e2a-80d6-60d516470fb7',
+             'kuchyneMotion': 'ba5ce109-150f-4d04-9948-b93e27334f8b'}
 
+"""
+# For creating new lights, switches, motion sensors
 for light in lights_id:
     print(light)
     get_response = requests.get("https://home_automation.iamroot.eu/newSmartLight")
@@ -40,6 +53,8 @@ for motion in motion_id:
     print(lights_id[light])
     url_change = requests.get(f"http://home_automation.iamroot.eu/device/{uuid}/report_url?url="
                               f"http://home_automation.iamroot.eu/device/{lights_id[light]}/state/on")
+"""
+
 
 @app.route("/cron")
 def change_color():
@@ -88,12 +103,36 @@ def toggle_light(device):
 
 @app.route("/<device>/info")
 def device_info(device):
+    if "username" not in session:
+        return "You are not logged in <br><a href = '/'>" + "click here to log in</a>"
     id = escape(device)
     get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}")
     info = loads(get_response.text)
     actions = info["actions"]
-    return render_template("device_info.html", info=info, actions=actions)
+    username = session["username"]
+    type = info["type"]
+    safe = False
+    # https://stackoverflow.com/questions/8023306/get-key-by-value-in-dictionary
+    if type == "SmartLight":
+        if list(lights_id.keys())[list(lights_id.values()).index(id)] in [(username+"Light"), "kuchyneLight",
+                                                                          "obyvakLight"]:
+            safe = True
+    elif type == "SwitchSensor":
+        if list(switches_id.keys())[list(switches_id.values()).index(id)] in [(username+"Switch"), "kuchyneSwitch",
+                                                                              "obyvakSwitch"]:
+            safe = True
+    print(safe)
+    return render_template("device_info.html", info=info, actions=actions, username=username, safe=safe)
 
+
+@app.route("/<device>/info_safe")
+def device_info_safe(device):
+    id = escape(device)
+    get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}")
+    info = loads(get_response.text)
+    actions = info["actions"]
+    username = session["username"]
+    return render_template("device_info.html", info=info, actions=actions, username=username)
 
 @app.route("/menu")
 def junction():
@@ -101,13 +140,14 @@ def junction():
         return "You are not logged in <br><a href = '/'>" + "click here to log in</a>"
     username = session["username"]
     return f"""
+    <style></style>
     Logged in as { username } <br>
     <a href = "/logout">Log out</a>
-    <br>
-    <a href = "/map"> Map </a> <br>
-    <a href = "/controls"> Controls </a> <br>
-    <a href = "/devices"> Devices </a> <br>
-    <a href = "/heating"> Heating payment </a>
+    <h2>Menu</h2>
+    <button><a href = "/map"> Map </a></button> <br>
+    <button><a href = "/controls"> Controls </a></button> <br>
+    <button><a href = "/devices"> Devices </a></button> <br>
+    <button><a href = "/heating"> Heating payment </a></button>
     """
 
 
@@ -147,7 +187,9 @@ def devices():
     if "username" not in session:
         return "You are not logged in <br><a href = '/'>" + "click here to log in</a>"
     username = session["username"]
-    return render_template("devices.html", lights_id=lights_id, motion_id=motion_id, switches_id=switches_id)
+    return render_template("devices.html", lights_id=lights_id, motion_id=motion_id, switches_id=switches_id,
+                           username=username)
+
 
 @app.route("/heating")
 def heating():
@@ -176,6 +218,7 @@ def heating():
 
 def show_register_page() -> str:
     return f"""
+    This site uses cookies.
     <form action="{url_for('register')}" method="post">
         Username: <input type="text" name="username"><br>
         Password: <input type="password" name="password"><br>
