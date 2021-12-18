@@ -121,18 +121,11 @@ def device_info(device):
         if list(switches_id.keys())[list(switches_id.values()).index(id)] in [(username+"Switch"), "kuchyneSwitch",
                                                                               "obyvakSwitch"]:
             safe = True
+    if type == "MotionSensor":
+        safe = True
     print(safe)
     return render_template("device_info.html", info=info, actions=actions, username=username, safe=safe)
 
-
-@app.route("/<device>/info_safe")
-def device_info_safe(device):
-    id = escape(device)
-    get_response = requests.get(f"https://home_automation.iamroot.eu/device/{id}")
-    info = loads(get_response.text)
-    actions = info["actions"]
-    username = session["username"]
-    return render_template("device_info.html", info=info, actions=actions, username=username)
 
 @app.route("/menu")
 def junction():
@@ -219,6 +212,7 @@ def heating():
 def show_register_page() -> str:
     return f"""
     This site uses cookies.
+    <h2>Smarthome login</h2>
     <form action="{url_for('register')}" method="post">
         Username: <input type="text" name="username"><br>
         Password: <input type="password" name="password"><br>
