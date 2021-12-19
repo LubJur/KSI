@@ -6,6 +6,9 @@ from time import sleep
 from bs4 import BeautifulSoup
 import requests
 
+all_urls = []
+
+
 class FullScrap(NamedTuple):
     # TUTO TRIDU ROZHODNE NEMEN
     linux_only_availability: List[str]
@@ -45,21 +48,60 @@ def get_linux_only_availability(base_url: str) -> List[str]:
     pass
 
 
+def scraper(base):
+    visited = {}
+    to_visit = []
+    unfiltered = []
+    to_visit.append(base)
+
+    while len(to_visit) > 0:
+        node = to_visit.pop()
+        visited[node] = 1
+        sleep(0.2)
+        soup = BeautifulSoup(download_webpage(node).content, "html.parser")
+        if requests.get(node).status_code != 200:
+            print("TEA:", node)
+            break
+        all_a = soup.find_all("a")
+        for a in all_a:
+            a = a.get("href")
+            # print("a", a)
+            rozdelena = node.split("/")[:-1]
+            full = "/".join(rozdelena) + "/" + a
+            # full = node.split("/")[-1]+"/"+a
+            # and a[-5:] == ".html"
+            if a[:4] != "http" and a[0] != "#" and a != "/" and full not in to_visit and a[:3] != "../":
+                if a[-5:] == ".html":
+                    if full in visited:
+                        visited[full] = visited[full] + 1
+                        continue
+
+                    # print("full", full)
+                    # print(to_visit)
+                    to_visit.insert(0, full)
+                    # print("full", full)
+                    # print("po_pridani", to_visit)
+                    print(len(to_visit))
+                else:
+                    if requests.get(full).status_code == 418:
+                        print("TEA:", full)
+                        break
+
+
+
 def get_most_visited_webpage(base_url: str) -> Tuple[int, str]:
     """
     Finds the page with most links to it
     :param base_url: base url of the website
     :return: number of anchors to this page and its URL
     """
-
-    visited = []
-    to_visit = []
-    unfiltered = []
-    to_visit.append("https://python.iamroot.eu/")
+    # https://medium.com/analytics-vidhya/apply-depth-first-search-on-web-scraping-770ba20ba33f
+    visited = {}
+    to_visit = [base_url]
 
     while len(to_visit) > 0:
         node = to_visit.pop()
-        visited.append(node)
+        visited[node] = 1
         sleep(0.2)
         soup = BeautifulSoup(download_webpage(node).content, "html.parser")
         if requests.get(node).status_code != 200:
@@ -72,27 +114,35 @@ def get_most_visited_webpage(base_url: str) -> Tuple[int, str]:
             rozdelena = node.split("/")[:-1]
             full = "/".join(rozdelena) + "/" + a
             #full = node.split("/")[-1]+"/"+a
-            if full not in visited and a[:4] != "http" and a[0] != "#" and a != "/" and full not in to_visit \
-                    and a[-5:] == ".html" and a[:3] != "../":
+            # and a[-5:] == ".html"
+            if a[:4] != "http" and a[0] != "#" and a != "/" and full not in to_visit and a[:3] != "../" and a[-5:] == ".html":
+                if full in visited:
+                    visited[full] = visited[full] + 1
+                    continue
                 #print("full", full)
                 #print(to_visit)
                 to_visit.insert(0, full)
                 #print("full", full)
                 #print("po_pridani", to_visit)
                 print(len(to_visit))
-            else:
-                unfiltered.append(full)
-                for i in unfiltered:
-                    unfiltered.remove(i)
-                    if requests.get(i).status_code == 418:
-                        print("TEA:", i)
-                        break
-            #if full not in visited and full not in unfiltered:
-
+    # https://stackoverflow.com/questions/20453674/how-to-find-the-largest-value-in-a-dictionary-by-comparing-values
+    max_visited = max(visited, key=visited.get)
+    return (max_visited, visited[max_visited])
+    """
+    else:
+        unfiltered.append(full)
+        for i in unfiltered:
+            unfiltered.remove(i)
+            if requests.get(i).status_code == 418:
+                print("TEA:", i)
+                break
+    #if full not in visited and full not in unfiltered:
+    """
     print(len(visited))
     print(visited)
+    print(max(visited, key=visited.get))
 
-
+    #https: // python.iamroot.eu / library / stdtypes.html
 
 
 
@@ -186,7 +236,26 @@ def find_secret_tea_party(base_url: str) -> Optional[str]:
     :return: url at which the secret tea party can be found
     """
     # Tuto funkci implementuj
-    pass
+    # https://medium.com/analytics-vidhya/apply-depth-first-search-on-web-scraping-770ba20ba33f
+    visited = {}
+    to_visit = [base_url]
+
+    while len(to_visit) > 0:
+        node = to_visit.pop()
+        visited[node] = 1
+        sleep(0.2)
+        soup = BeautifulSoup(download_webpage(node).content, "html.parser")
+        all_a = soup.find_all("a")
+        for a in all_a:
+            a = a.get("href")
+            # it only changes the last part after / (www.x.com/test/[change]
+            splitted = node.split("/")[:-1]
+            full = "/".join(splitted) + "/" + a
+            # without .html because it didn't find anything with it, but it takes a lot longer
+            if a[:4] != "http" and a[0] != "#" and a != "/" and full not in to_visit and a[:3] != "../":
+                to_visit.insert(0, full)
+                if requests.get(full).status_code == 418:
+                    return full
 
 
 def scrap_all(base_url: str) -> FullScrap:

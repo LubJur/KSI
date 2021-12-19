@@ -81,6 +81,7 @@ def connect(hostname, port, name, password, description, isNSFW, meme):
             status.set("E token not received")
             window.update()
             send_btn["state"] = "enable"
+            return
         data_port = decoder.feed(s.recv(1024))
         data_port = data_port[0].decode()
         if data_port[0] == "E":
@@ -88,6 +89,7 @@ def connect(hostname, port, name, password, description, isNSFW, meme):
             status.set("E data port not received")
             window.update()
             send_btn["state"] = "enable"
+            return
         data_port = data_port[2:]
         status.set("Sending data...")
         window.update()
