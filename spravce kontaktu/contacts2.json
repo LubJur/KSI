@@ -1,0 +1,22 @@
+{
+  "contacts": [
+    {
+      "name": "Lubomir",
+      "surname": "Jurcisin",
+      "displayed": "Lubko",
+      "birthday": "03.05.2003",
+      "email": "jurcisinlubomir@gmail.com",
+      "phone": "+421907928738",
+      "note": "This is my kontakt"
+    },
+    {
+      "name": "Testy",
+      "surname": "McTestFace",
+      "displayed": "Test",
+      "birthday": "24.12.2001",
+      "email": "test@testy.com",
+      "phone": "+4324587442",
+      "note": "Test me!"
+    }
+  ]
+}

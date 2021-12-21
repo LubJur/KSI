@@ -27,8 +27,7 @@ from telnetlib import Telnet
 import sys
 
 def main():
-    #hostname, port = sys.argv[1], int(sys.argv[2])
-
+    hostname, port = sys.argv[1], int(sys.argv[2])
 
     with Telnet(hostname, port) as tn:
         while True:
