@@ -14,8 +14,8 @@ with pyzipper.AESZipFile("staryarchiv.zip") as my_zip:
         password = bytes(combination, encoding="utf8")
         try:
             my_zip.extractall(pwd=password)
-        except:
+        except RuntimeError:
             pass
         else:
-            print("The password is:", combination)
+            print("The password is:", combination)  # pog
             break
