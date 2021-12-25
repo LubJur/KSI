@@ -1,0 +1,95 @@
+{% extends "root.html" %}
+{% block title %}
+    Submission of {{ submission.user }}
+{% endblock %}
+{% block head %}
+    <style>
+    .submission > img {
+        height: 30em;
+    }
+
+    .submission {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .submission > .votes {
+        margin-top: 24px;
+        font-weight: bold;
+        font-size: 24px;
+    }
+
+    .comments {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .comment, .new-comment {
+        border: 2px solid black;
+        width: 80vw;
+        padding: 8px;
+        border-radius: 4px;
+        margin: 8px;
+    }
+
+    .new-comment > * {
+        width: calc(100% - 16px);
+        padding: 8px;
+    }
+
+    .comment > .info {
+        margin-top: 8px;
+        font-style: italic;
+    }
+
+    .voted {
+        animation: blink 3s;
+        animation-iteration-count: infinite;
+        --color-from: magenta;
+        --color-to: white;
+    }
+    </style>
+{% endblock %}
+{% block content %}
+    <h1>
+        Submission of {{ submission.user }}
+    </h1>
+
+    <div class="submission">
+        <img src="{{ url_for('submission_img') }}?user={{ submission.user }}&format=.png" alt="{{ submission.user }}'s submission">
+        <div class="votes">
+            {{ submission.votes|length }} votes
+            {% if can_vote %}
+                <form method="POST">
+                <input name="type" value="vote" style="display: none">
+                <button type="submit">vote +1</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="comments">
+        {% if can_comment %}
+            <form class="new-comment" method="POST">
+            <input name="type" value="comment" style="display: none">
+            <input name="user" value="{{ username }} {% if not can_vote %}<span class=voted> (has already voted)</span>{% endif %}" style="display: none">
+            <script>document.write(`<input name="date" value="${Math.floor(Date.now() / 1000)}" style="display: none">`)</script>
+            <textarea name="body" placeholder="Enter your comment here..."></textarea>
+            <button type="submit">Send comment</button>
+        </form>
+        {% endif %}
+
+        {% for comment in comments %}
+            <div class="comment">
+            <div class="body">
+                {{ comment.body }}
+            </div>
+            <div class="info">
+                -- {{ comment.user|safe }}, <script>document.write(new Date({{ comment.date }} * 1000).toLocaleString())</script>
+            </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

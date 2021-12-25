@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- 2018: add mobile support! -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+        {% block title %}
+        MisLos
+        {% endblock %}
+    </title>
+    <style>
+        :root, input {
+            font-size: 18px;
+        }
+
+        .top-menu {
+            border-bottom: 5px dashed black;
+            display: flex;
+            justify-content: space-between;
+            margin: 16px 8px;
+            padding: 10px;
+
+            animation: blink-border 1.75s;
+            animation-iteration-count: infinite;
+            --color-from: yellow;
+            --color-to: purple;
+        }
+
+        .top-menu--title {
+            color: green;
+            animation: blink 2s;
+            animation-iteration-count: infinite;
+            --color-from: green;
+            --color-to: red;
+            font-size: 2em;
+        }
+
+        footer {
+            margin-top: 24px;
+            padding-top: 8px;
+            border-top: 2px dotted black;
+
+            animation: blink-border 1.75s;
+            animation-iteration-count: infinite;
+            --color-from: blue;
+            --color-to: orange;
+        }
+
+        .error {
+            color: red;
+        }
+
+        @keyframes blink {
+            0% {
+                color: var(--color-from);
+            }
+            50% {
+                color:  var(--color-to);
+            }
+            100% {
+                color:  var(--color-from);
+            }
+        }
+
+        @keyframes blink-border {
+            0% {
+                border-color: var(--color-from);
+            }
+            50% {
+                border-color:  var(--color-to);
+            }
+            100% {
+                border-color:  var(--color-from);
+            }
+        }
+    </style>
+    {% block head %}
+    {% endblock %}
+</head>
+<body>
+
+<div class="top-menu">
+<span>
+    <script>d = new Date(); document.write(d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds())</script>
+</span>
+<b class="top-menu--title">Los Miss</b>
+{% if username %}
+    <span>
+        <span>You are logged in as {{ username }}</span>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </span>
+{%  else %}
+    <a href="{{ url_for('login') }}">Login</a>
+{% endif %}
+</div>
+
+{% block content %}
+{% endblock content %}
+
+<footer>
+    (c) 1921 - <script>document.write(new Date().getFullYear() + '')</script> Miss Los: Scholarship pageant - the largest tuition provider for animals
+</footer>
+</body>
+</html>

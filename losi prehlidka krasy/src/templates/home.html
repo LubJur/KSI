@@ -1,0 +1,43 @@
+{% extends "root.html" %}
+{% block title %}
+    Welcome to MisLos
+{% endblock %}
+{% block head %}
+    <style>
+    .submissions {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .submission {
+        display: inline-block;
+        border: 2px dashed red;
+        margin: 16px;
+        padding: 8px;
+    }
+
+    .submission > img {
+        height: 5em;
+    }
+    </style>
+{% endblock %}
+{% block content %}
+    <h1>
+        Welcome!
+    </h1>
+
+    {% if username and not my_submission %}
+        <a href="{{ url_for('new_submission') }}">Add my own submission</a>
+    {% endif %}
+
+    <h2>Current submissions:</h2>
+
+    <div class="submissions">
+    {% for submission in submissions %}
+        <a class="submission" href="{{ url_for('submission', user=submission.user) }}">
+            <img src="{{ url_for('submission_img') }}?user={{ submission.user }}&format=.png" alt="{{ submissions.user }}'s submission">
+            <div class="comment">{{ submission.user }}, {{ submission.votes|length }} votes</div>
+        </a>
+    {% endfor %}
+    </div>
+{% endblock %}

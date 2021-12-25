@@ -1,0 +1,21 @@
+{% extends "root.html" %}
+{% block title %}
+    Add own submission
+{% endblock %}
+{% block head %}
+    <style>
+
+    </style>
+{% endblock %}
+{% block content %}
+    <h1>
+        Add your own submission
+    </h1>
+
+    <b class="error">{{ error }}</b>
+
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <button>Upload my image</button>
+    </form>
+{% endblock %}

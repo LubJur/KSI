@@ -1,0 +1,35 @@
+{% extends "root.html" %}
+{% block title %}
+    Login to MisLos
+{% endblock %}
+{% block head %}
+    <style>
+        form {
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        form > * {
+            width: 80%;
+            margin: 10px 0;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+<form method="POST">
+
+    <h1>MisLos login</h1>
+
+    <b class="error">{{error}}</b>
+    <input type="text" placeholder="Your Los name" name="name">
+    <input type="password" placeholder="Your password! Must be unique! Max 12 characters. Use only alphabet characters."
+           maxlength="12"
+    name="password">
+    <button>Login</button>
+    <i>Hint: If you do not have an account yet, upon login one will be created for you</i>
+</form>
+{% endblock %}
