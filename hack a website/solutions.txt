@@ -1,0 +1,33 @@
+lvl 1 - sql injection
+NovotnyP
+' or '1'='1
+prx1234653823d
+
+lvl 2 - cookies
+userRole admin
+C93Ldd02DFvcx
+
+lvl 3
+
+Detaily jsou uložené v souboru, který je zašifrovaný pomocí 8 Bytového klíče DES algoritmem v ECB módu. První 2 Byty klíče odpovídají id vězňa zakódovaného v bigEndian formátu. Další 3 Byty jsou bezpečnostní Byty, které byly zvoleny administrátorem aplikace v době vězňovi registrace. Poslední 3 Byty klíče odpovídají prvním 3 znakům vězňova jména v ASCII formátu.
+00 F1 F4 06 5A 4B 61 72
+
+67 835 469 394 305 394
+68 116 944 354 238 834
+
+http://pydes.sourceforge.net/
+https://pypi.org/project/des/
+
+
+Id v systému: 241
+Jméno: Karlík
+Příjmení: Tučňatý
+Bezpečnostní kód: adfe-kf32-32gh-dh7j
+Nástup do vězení: 19.12.2021
+Propuštěn: NE
+Délka trestu: 1 009 822 464 042 325 microsekund
+Zločin: Kybernetické zločiny 1. stupně
+Detailní popis zločinu:
+
+Dne 17.12.2021 byl detekován nepovolený vstup na servery společnosti makro.cz, kde byla vytvořena neutorizovaná objednávka 2 tun nejlepších severských ryb, která byla označena jako zaplacená, přesto že jakákoliv platba doposud neproběhla. Podle záznamů z logů na serveru byl útok proveden z terminálu, který po identifikaci byl přiřazen právě Karlíku Tučňatému. Dále byl ze stejného terminálu proveden útok na servery společnosti alza.cz, kde útočník zašifroval všechny vytvořené propagační materiály, a způsobil tak společnosti odhadovanou škodu přibližně 39.2 milionů euro.
+FOUND 15992410 b'\x00\xf1\xf4\x06ZKar'
