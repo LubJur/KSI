@@ -22,4 +22,3 @@ with open("prisonerDetails", "rb") as file:
             pass
         else:
             print("FOUND", i, secret)
-
