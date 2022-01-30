@@ -14,3 +14,14 @@
     file.write(database.content)  # https://365datascience.com/tutorials/python-tutorials/python-requests-package/
     Out[15]: 928
     file.close()
+
+* nahranie suboru pomocou HTTP requestu kde by nemal byt nahran
+    posleme POST request na /submission/<user co uz dal submission>
+
+    print(session.post("http://127.0.0.1:5000/submission/losak"))
+    <Response [200]>
+    file = open("/home/lubomir/Desktop/Gymnázium/4. ročník/KSI/kreslenie a dialogy/upload.txt", "rb")
+    print(file.read())
+    b'toto je test upload pre losi prehlidka krasy'
+    print(session.post("http://127.0.0.1:5000/submission/losak", data=file))
+    <Response [200]>
