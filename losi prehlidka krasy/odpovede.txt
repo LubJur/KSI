@@ -1,6 +1,8 @@
 * XSS mozes vlozit <script>alert('XSS');</script> do komentaru a spusti sa to
 
-* mozno na prihlasenie za ineho pouzivatela mozme menit cookie userID
+* prihlasenie bez hesla
+    zmenime hodnotu cookie user_id na taku co ktoru ma iny pouzivatel
+    napr. user_id 9758960644 ma losak
 
 * unik dat z databaze:
     line 60 v main.py, directory traversal
