@@ -1,0 +1,43 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<head>
+    <style type="text/css">
+        table, td, th {
+            border: 1px solid black;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        #user {
+
+        }
+    </style>
+</head>
+<body>
+    <div id="user">
+        Logged in as {{ username }} <br>
+        <a href = "/logout">Log out</a> <br>
+    </div>
+    <h2>Heating payment</h2>
+    <table>
+        <tr>
+            <th>Roommate</th>
+            <th>Percentage</th>
+        </tr>
+        <tr>
+            <th>Karsob</th>
+            <th>{{ karsob }}%</th>
+        </tr>
+        <tr>
+            <th>Karlos</th>
+            <th>{{ karlos }}%</th>
+        </tr>
+        <tr>
+            <th>Julia</th>
+            <th>{{ julia }}%</th>
+        </tr>
+        <tr>
+            <th>Karlik</th>
+            <th>{{ karlik }}%</th>
+        </tr>
+    </table>
+</body>
