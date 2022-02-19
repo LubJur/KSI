@@ -1,14 +1,14 @@
 import pyzipper
 import itertools
 
-slova = ["Homer", "Jay", "Simpson", "Springfield", "Abraham", "Mona", "Marge", "Bart", "Lisa", "Maggie", "Spasitel",
+words = ["Homer", "Jay", "Simpson", "Springfield", "Abraham", "Mona", "Marge", "Bart", "Lisa", "Maggie", "Spasitel",
          "Snehulka", "donut", "pivo", "burger", "baseball", "fotbal", "basketbal"]
-cisla = ["12", "5", "05", "1956", "56", "19"]
+numbers = ["12", "5", "05", "1956", "56", "19"]
 
-slova_up = [i.upper() for i in slova]
-slova_lo = [i.lower() for i in slova]
+words_up = [i.upper() for i in words]
+words_lo = [i.lower() for i in words]
 
-info = slova + slova_up + slova_lo + cisla
+info = words + words_up + words_lo + numbers
 
 comb2 = itertools.product(info, repeat=2)
 comb3 = itertools.product(info, repeat=3)
@@ -25,7 +25,6 @@ with open("passwords.txt", "a") as dictionary:
 
 with pyzipper.AESZipFile("homer_simpson.zip") as my_zip:
     with open("passwords.txt") as dictionary:
-        # https://www.kite.com/python/answers/how-to-iterate-through-the-lines-of-a-file-in-python
         for word in dictionary:
             word = word.strip()
             print("Trying:", word)

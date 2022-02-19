@@ -4,8 +4,7 @@ import itertools
 
 alphabet = list(string.ascii_lowercase)
 
-# https://www.delftstack.com/howto/numpy/python-numpy-combinations/
-combinations = itertools.product(alphabet, alphabet, alphabet)
+combinations = itertools.product(alphabet, repeat=3)
 
 with pyzipper.AESZipFile("staryarchiv.zip") as my_zip:
     for combination in combinations:
