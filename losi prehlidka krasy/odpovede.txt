@@ -30,3 +30,5 @@
     b'toto je test upload pre losi prehlidka krasy'
     print(session.post("http://127.0.0.1:5000/submission/losak", data=file))
     <Response [200]>
+
+* na dekodovanie by mohlo byt line 70 v database.py
