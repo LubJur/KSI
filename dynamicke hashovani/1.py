@@ -40,7 +40,10 @@ def contains(table: CuckooHashTable, key: int) -> bool:
             ‹False› jinak
     očekávaná časová složitost: O(1), tedy konstantní
     """
-    # TODO
+    if key in table.array1 or key in table.array2:
+        return True
+    else:
+        return False
 
 # Část 2.
 # Implementujte funkci delete, která ze zadané tabulky odstraní zadaný klíč.
@@ -55,7 +58,14 @@ def delete(table: CuckooHashTable, key: int) -> bool:
             tabulka obsahuje.
     očekávaná časová složitost: O(1), tedy konstantní
     """
-    # TODO
+    if key in table.array1:
+        table.array1[table.array1.index(key)] = None
+        return True
+    elif key in table.array2:
+        table.array2[table.array2.index(key)] = None
+        return True
+    else:
+        return False
 
 
 # Část 3.
@@ -66,7 +76,9 @@ def delete(table: CuckooHashTable, key: int) -> bool:
 ALREADY_PRESENT = 0
 INSERT_SUCCESSFUL = 1
 INSERT_FAILED = 2
-
+origin_state_1 = []
+origin_state_2 = []
+saved = False
 
 def insert(table: CuckooHashTable, key: int, max_kicks: int) -> int:
     """
@@ -86,20 +98,58 @@ def insert(table: CuckooHashTable, key: int, max_kicks: int) -> int:
             do původního stavu.
     očekávaná časová složitost: O(max_kicks)
     """
-    kick_c = 0
-    print(table.array1)
+    print("array1", table.array1)
+    print("array2", table.array2)
+    print("hash1", key % 5)
+    print("hash2", key // 5 % 5)
+    print("max_kicks", max_kicks)
+    global saved
+    global origin_state_1
+    global origin_state_2
+
+    if saved == False:
+        origin_state_1 = list(table.array1)
+        origin_state_2 = list(table.array2)
+        saved = True
+
     if table.array1[table.hash1(key)] is None:
         table.array1[table.hash1(key)] = key
+        print("SUCCESS")
+        saved = False
         return INSERT_SUCCESSFUL
     elif table.array2[table.hash2(key)] is None:
         table.array2[table.hash2(key)] = key
+        print("SUCCESS")
+        saved = False
         return INSERT_SUCCESSFUL
     else:
-        while kick_c < max_kicks:
+        while max_kicks > 0:
+            print("skusam po", max_kicks, "vkladam", key)
+            print("davam do pozicie", key % 5, "v tabulke", table.array1, "kluc", key)
             kicked = table.array1[table.hash1(key)]
             table.array1[table.hash1(key)] = key
-            table.array2[table.hash2(key)] = kicked
-
+            key = kicked
+            print("skusam ci miesto", key // 5 % 5, "v tabulke", table.array2, "pre kluc", key, "je prazdne")
+            if table.array2[table.hash2(key)] == None:
+                table.array2[table.hash2(key)] = key
+                print("SUCCESS")
+                return INSERT_SUCCESSFUL
+            else:
+                print("davam do pozicie", key // 5 % 5, "v tabulke", table.array2, "kluc", key)
+                kicked = table.array2[table.hash2(key)]
+                table.array2[table.hash2(key)] = key
+                key = kicked
+                print("pred opakovanim vyzeraju tabulky, chcem vlozit", key)
+                print(table.array1)
+                print(table.array2)
+                if key == None:
+                    return INSERT_SUCCESSFUL
+                max_kicks -= 1
+        table.array1 = origin_state_1
+        table.array2 = origin_state_2
+        saved = False
+        print("FAIL")
+        return INSERT_FAILED
 
 def h1(key: int) -> int:
     return key % 5
@@ -149,3 +199,4 @@ def test() -> None:
 
 
 test()
+print("finished")
