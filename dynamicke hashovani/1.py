@@ -76,8 +76,6 @@ def delete(table: CuckooHashTable, key: int) -> bool:
 ALREADY_PRESENT = 0
 INSERT_SUCCESSFUL = 1
 INSERT_FAILED = 2
-origin_state_1 = []
-origin_state_2 = []
 
 def insert(table: CuckooHashTable, key: int, max_kicks: int) -> int:
     """
@@ -97,10 +95,12 @@ def insert(table: CuckooHashTable, key: int, max_kicks: int) -> int:
             do původního stavu.
     očekávaná časová složitost: O(max_kicks)
     """
-    global origin_state_1
-    global origin_state_2
+
     origin_state_1 = list(table.array1)
     origin_state_2 = list(table.array2)
+
+    if contains(table, key):
+        return ALREADY_PRESENT
 
     if table.array1[table.hash1(key)] is None:
         table.array1[table.hash1(key)] = key
@@ -114,56 +114,22 @@ def insert(table: CuckooHashTable, key: int, max_kicks: int) -> int:
             table.array1[h1(key)] = key
             key = kicked
             max_kicks -= 1
-            if table.array2[h2(key)] == None:
+            if table.array2[h2(key)] is None:
                 table.array2[h2(key)] = key
                 return INSERT_SUCCESSFUL
             else:
                 kicked = table.array2[h2(key)]
                 table.array2[h2(key)] = key
                 key = kicked
-                max_kicks -=1
-                if table.array1[h1(key)] == None:
+                max_kicks -= 1
+                if table.array1[h1(key)] is None:
                     table.array1[h1(key)] = key
                     return INSERT_SUCCESSFUL
         table.array1 = origin_state_1
         table.array2 = origin_state_2
         return INSERT_FAILED
 
-"""
-            i=i+1
 
-            print("skusam po", max_kicks, "vkladam", key)
-            print("davam do pozicie", key % 5, "v tabulke", table.array1, "kluc", key)
-            kicked = table.array1[table.hash1(key)]
-            table.array1[table.hash1(key)] = key
-            key = kicked
-            print("skusam ci miesto", key // 5 % 5, "v tabulke", table.array2, "pre kluc", key, "je prazdne")
-            if table.array2[table.hash2(key)] == None:
-                table.array2[table.hash2(key)] = key
-                print("SUCCESS")
-                return INSERT_SUCCESSFUL
-            else:
-                print("davam do pozicie", key // 5 % 5, "v tabulke", table.array2, "kluc", key)
-                kicked = table.array2[table.hash2(key)]
-                table.array2[table.hash2(key)] = key
-                key = kicked
-                print("pred opakovanim vyzeraju tabulky, chcem vlozit", key)
-                print(table.array1)
-                print(table.array2)
-                if table.array1[table.hash1(key)] == None:
-                    table.array1[table.hash1(key)] = key
-                    print("SUCCESS")
-                    return INSERT_SUCCESSFUL
-                if key == None:
-                    return INSERT_SUCCESSFUL
-                max_kicks -= 1
-            print(i)
-        table.array1 = origin_state_1
-        table.array2 = origin_state_2
-        saved = False
-        print("FAIL")
-        return INSERT_FAILED
-"""
 def h1(key: int) -> int:
     return key % 5
 
