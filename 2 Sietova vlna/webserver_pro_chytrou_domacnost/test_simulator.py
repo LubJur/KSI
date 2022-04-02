@@ -1,11 +1,6 @@
 import time
 
-from flask import url_for
-from typing import List, Tuple, Optional, Union
-from time import sleep
-import json
 import urllib.parse
-import requests
 import pytest
 from pprint import pprint
 
